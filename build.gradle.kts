@@ -13,7 +13,7 @@ buildscript {
     }
 }
 
-allprojects {
+subprojects {
     repositories {
         mavenCentral()
         jcenter()
