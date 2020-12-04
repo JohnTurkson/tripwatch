@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Tripwatch">
         <activity
-            android:name=".android.MainActivity"
+            android:name=".android.ui.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
