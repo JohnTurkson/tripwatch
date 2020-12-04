@@ -20,6 +20,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.johnturkson.tripwatch.R
+import com.johnturkson.tripwatch.android.ui.themes.FernGreen
+import com.johnturkson.tripwatch.android.ui.themes.TeaGreen
 
 @Composable
 fun LaunchScreen(navigationViewModel: NavigationViewModel) {
@@ -65,7 +67,7 @@ fun PasswordTextBox(value : TextFieldValue, onValueChange : (TextFieldValue) -> 
 fun LoginButton(navigateTo : (Screen) -> Unit) {
     Button(
         onClick = { navigateTo(Screen.Home) },
-        colors = ButtonConstants.defaultButtonColors(backgroundColor = Color.Red)) {
+        colors = ButtonConstants.defaultButtonColors(backgroundColor = Color.Green)) {
         Text("Log In")
     }
 }
