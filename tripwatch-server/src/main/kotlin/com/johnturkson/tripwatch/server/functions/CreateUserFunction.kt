@@ -14,7 +14,7 @@ import kotlinx.serialization.json.Json
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-class TripWatchCreateUserFunction : HttpLambdaFunction<Request, Response> {
+class CreateUserFunction : HttpLambdaFunction<Request, Response> {
     override val serializer = Json { ignoreUnknownKeys = true }
     
     override fun HttpRequest.decode(): Request? {
