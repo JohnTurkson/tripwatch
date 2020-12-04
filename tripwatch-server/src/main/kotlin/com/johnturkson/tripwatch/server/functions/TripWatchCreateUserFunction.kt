@@ -11,40 +11,27 @@ import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
 import kotlinx.serialization.json.Json
-import java.util.*
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-class TripWatchCreateUserFunction : HttpLambdaFunction {
+class TripWatchCreateUserFunction : HttpLambdaFunction<Request, Response> {
     override val serializer = Json { ignoreUnknownKeys = true }
     
-    override fun processRequest(request: HttpRequest): HttpResponse {
-        return request.decode().process().encode()
-    }
-    
-    fun HttpRequest.decodeBody(): String? {
-        return when {
-            body == null -> null
-            isBase64Encoded -> Base64.getDecoder().decode(body).decodeToString()
-            else -> body
-        }
-    }
-    
-    fun HttpRequest.decode(): Request? {
+    override fun HttpRequest.decode(): Request? {
         return when (val body = this.decodeBody()) {
             null -> null
             else -> serializer.decodeFromString(Request.serializer(), body)
         }
     }
     
-    fun Request?.process(): Response {
+    override fun Request?.process(): Response {
         return when (this) {
             is CreateUserRequest -> createUser(this.data)
             else -> InvalidRequestError
         }
     }
     
-    fun Response.encode(): HttpResponse {
+    override fun Response.encode(): HttpResponse {
         val statusCode = this.statusCode
         val headers = mapOf("Content-Type" to "application/json")
         val body = serializer.encodeToString(Response.serializer(), this)
