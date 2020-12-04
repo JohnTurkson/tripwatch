@@ -7,27 +7,19 @@ import com.johnturkson.tripwatch.common.requests.Request.CreateUserRequest
 import com.johnturkson.tripwatch.common.responses.Response
 import com.johnturkson.tripwatch.common.responses.Response.Error.BadRequest.InvalidRequestError
 import com.johnturkson.tripwatch.common.responses.Response.Success.OK.CreateUserResponse
+import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
-import com.johnturkson.tripwatch.server.lambda.LambdaFunction
 import kotlinx.serialization.json.Json
 import java.util.*
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-class TripWatchCreateUserFunction : LambdaFunction {
-    private val serializer = Json { ignoreUnknownKeys = true }
+class TripWatchCreateUserFunction : HttpLambdaFunction {
+    override val serializer = Json { ignoreUnknownKeys = true }
     
-    override fun processInput(input: String): String {
-        val httpRequest = input.decodeInput()
-        val request = httpRequest.decodeRequest()
-        val response = request.processRequest()
-        val httpResponse = response.encodeResponse()
-        return httpResponse.encodeOutput()
-    }
-    
-    fun String.decodeInput(): HttpRequest {
-        return serializer.decodeFromString(HttpRequest.serializer(), this)
+    override fun processRequest(request: HttpRequest): HttpResponse {
+        return request.decode().process().encode()
     }
     
     fun HttpRequest.decodeBody(): String? {
@@ -38,30 +30,26 @@ class TripWatchCreateUserFunction : LambdaFunction {
         }
     }
     
-    fun HttpRequest.decodeRequest(): Request? {
+    fun HttpRequest.decode(): Request? {
         return when (val body = this.decodeBody()) {
             null -> null
             else -> serializer.decodeFromString(Request.serializer(), body)
         }
     }
     
-    fun Request?.processRequest(): Response {
+    fun Request?.process(): Response {
         return when (this) {
             is CreateUserRequest -> createUser(this.data)
             else -> InvalidRequestError
         }
     }
     
-    fun Response.encodeResponse(): HttpResponse {
+    fun Response.encode(): HttpResponse {
         val statusCode = this.statusCode
         val headers = mapOf("Content-Type" to "application/json")
         val body = serializer.encodeToString(Response.serializer(), this)
         val isBase64Encoded = false
         return HttpResponse(statusCode, headers, body, isBase64Encoded)
-    }
-    
-    fun HttpResponse.encodeOutput(): String {
-        return serializer.encodeToString(HttpResponse.serializer(), this)
     }
     
     fun createUser(data: UserData): Response {
