@@ -67,5 +67,7 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization-jvm:1.4.0")
     implementation("io.ktor:ktor-client-android:1.4.0")
 
+    implementation("io.coil-kt:coil:1.1.0")
+
     implementation(project(":tripwatch-common:data"))
 }

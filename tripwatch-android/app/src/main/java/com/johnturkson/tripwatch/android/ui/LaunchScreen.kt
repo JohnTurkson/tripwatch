@@ -1,7 +1,5 @@
 package com.johnturkson.tripwatch.android.ui
 
-import android.widget.Toast
-import androidx.annotation.MainThread
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -10,10 +8,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
@@ -21,17 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
-import com.johnturkson.tripwatch.android.ui.themes.CulturedWhite
-import com.johnturkson.tripwatch.android.ui.themes.FernGreen
-import com.johnturkson.tripwatch.android.ui.themes.TeaGreen
 import com.johnturkson.tripwatch.android.utils.requestLogIn
 import com.johnturkson.tripwatch.common.data.UserData
-import com.johnturkson.tripwatch.common.responses.Response
-import com.johnturkson.tripwatch.common.responses.Response.*
 import com.johnturkson.tripwatch.common.responses.Response.Success.OK.CreateUserResponse
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 private val loginClicked = mutableStateOf(false)
@@ -50,7 +38,9 @@ fun LaunchScreen(appContainer : AppContainer, navigationViewModel: NavigationVie
 
         Image(imageResource(R.drawable.trip_watch))
 
-        Column(modifier=Modifier.fillMaxWidth(), verticalArrangement = Arrangement.SpaceEvenly) {
+        Text("Hello World!", color = MaterialTheme.colors.primary)
+
+        Column(modifier=Modifier.fillMaxWidth(), horizontalAlignment=Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
 
             EmailTextBox(value = emailTextState.value,
                             onValueChange = { emailTextState.value = it })
@@ -68,12 +58,12 @@ fun LaunchScreen(appContainer : AppContainer, navigationViewModel: NavigationVie
                 color = MaterialTheme.colors.error)
 
             Text(
-                textAlign = TextAlign.Center,
                 text = if (!loginSuccess.value && passwordValid.value && emailValid.value && loginClicked.value) "There was a problem communicating with the server. Try again later" else "",
                 color = MaterialTheme.colors.error)
+
+            LoginButton(appContainer, navigationViewModel::navigateTo)
         }
 
-        LoginButton(appContainer, navigationViewModel::navigateTo)
     }
 }
 
@@ -100,16 +90,25 @@ private fun PasswordTextBox(value : TextFieldValue, onValueChange : (TextFieldVa
 
 @Composable
 private fun LoginButton(appContainer : AppContainer, navigateTo : (Screen) -> Unit) {
-    Button(
-        colors = ButtonConstants.defaultButtonColors(
-            backgroundColor = MaterialTheme.colors.secondary
-        ),
-        onClick = {
-            loginClicked.value = true
-            HandleLogIn(appContainer = appContainer,
-                userData = UserData(emailTextState.value.text, "", passwordTextState.value.text),
-                navigateTo = navigateTo)
-        }) {
+        Button(
+            colors = ButtonConstants.defaultButtonColors(
+                backgroundColor = MaterialTheme.colors.primary
+            ),
+            onClick = {
+                loginClicked.value = true
+                /*
+                HandleLogIn(
+                    appContainer = appContainer,
+                    userData = UserData(
+                        emailTextState.value.text,
+                        "",
+                        passwordTextState.value.text
+                    ),
+                    navigateTo = navigateTo
+                )
+                */
+                navigateTo(Screen.Home)
+            }) {
 
             Text("Log In")
         }
