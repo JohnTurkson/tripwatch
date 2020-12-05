@@ -11,6 +11,9 @@ import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
 import kotlinx.serialization.json.Json
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import java.security.MessageDigest
+import java.util.Base64
 import kotlin.random.Random
 import kotlin.random.nextInt
 
@@ -54,5 +57,13 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         var id = ""
         repeat(length) { id += Random.nextInt(0..0xf).toString(0x10) }
         return id
+    }
+    
+    fun generatePasswordHash(password: String): String {
+        val prehashAlgorithm = "SHA-512"
+        val prehashBytes = MessageDigest.getInstance(prehashAlgorithm).digest(password.toByteArray())
+        val prehashHex = Base64.getEncoder().encodeToString(prehashBytes)
+        val encoder = BCryptPasswordEncoder()
+        return encoder.encode(prehashHex)
     }
 }

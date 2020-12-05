@@ -7,6 +7,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.4.20")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.1")
+    implementation("org.springframework.security:spring-security-crypto:5.4.2")
+    implementation("org.springframework:spring-jcl:5.3.1")
     implementation("com.johnturkson.aws-tools:aws-dynamodb-object-builder:0.0.37")
     implementation("com.johnturkson.aws-tools:aws-dynamodb-request-builder:0.0.37")
     implementation("com.johnturkson.aws-tools:aws-dynamodb-transforming-serializer:0.0.37")
