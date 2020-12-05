@@ -15,17 +15,25 @@ dependencies {
     implementation("com.johnturkson.aws-tools:aws-request-handler:0.0.37")
     implementation("com.johnturkson.aws-tools:aws-ses-request-builder:0.0.37")
     implementation("com.johnturkson.aws-tools:aws-ses-request-handler:0.0.37")
-    implementation(project(":tripwatch-common"))
+    implementation(project(":tripwatch-common:data"))
 }
 
-tasks.register<Copy>("copyLambdaLayerDependencies") {
-    from(configurations.runtimeClasspath)
-    into("$buildDir/lambda/layer/java/lib")
+tasks.named<DefaultTask>("build") {
+    dependsOn("buildLambdaLayer")
+    dependsOn("buildLambdaFunctions")
 }
 
 tasks.register<Zip>("buildLambdaLayer") {
-    archiveFileName.set("tripwatch-kotlin-lambda-layer.zip")
-    destinationDirectory.set(file("$buildDir/lambda"))
-    from("$buildDir/lambda/layer")
-    dependsOn("copyLambdaLayerDependencies")
+    archiveFileName.set("TripWatchKotlinLambdaLayer.zip")
+    destinationDirectory.set(file("$buildDir/lambda/layers"))
+    from(configurations.runtimeClasspath)
+    into("java/lib")
+}
+
+tasks.register<Zip>("buildLambdaFunctions") {
+    archiveFileName.set("TripWatchKotlinLambdaFunctions.zip")
+    destinationDirectory.set(file("$buildDir/lambda/functions"))
+    from(tasks.named("compileKotlin"))
+    from(tasks.named("processResources"))
+    into("")
 }
