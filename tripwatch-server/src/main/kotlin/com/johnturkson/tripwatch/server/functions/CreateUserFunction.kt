@@ -8,12 +8,14 @@ import com.johnturkson.tripwatch.common.responses.Response
 import com.johnturkson.tripwatch.common.responses.Response.ClientError.BadRequest.*
 import com.johnturkson.tripwatch.common.responses.Response.ServerError.InternalServerError
 import com.johnturkson.tripwatch.common.responses.Response.Success.OK.CreateUserResponse
+import com.johnturkson.tripwatch.server.configuration.ClientConfiguration
 import com.johnturkson.tripwatch.server.configuration.DatabaseRequestHandler
 import com.johnturkson.tripwatch.server.configuration.SerializerConfiguration
 import com.johnturkson.tripwatch.server.data.UserData
 import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
+import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
@@ -99,26 +101,53 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         return encoder.encode(prehashHex)
     }
     
-    private fun String.isInvalidEmail(): Boolean {
+    fun String.isInvalidEmail(): Boolean {
         // TODO
         return false
     }
     
-    private fun String.isTooShort(): Boolean {
+    fun String.isTooShort(): Boolean {
         return this.length < 10
     }
     
-    private fun String.isTooLong(): Boolean {
+    fun String.isTooLong(): Boolean {
         return this.length > 1000
     }
     
-    private fun String.isCommonPassword(): Boolean {
+    fun String.isCommonPassword(): Boolean {
         // TODO
         return false
     }
     
-    private fun String.isBreached(): Boolean {
-        // TODO
-        return false
+    suspend fun String.isBreached(): Boolean {
+        val algorithm = "SHA-1"
+        val hash = MessageDigest.getInstance(algorithm).digest(this.toByteArray()).toHex().toUpperCase()
+        
+        val start = 0
+        val length = 5
+        val prefix = hash.substring(start until length)
+        
+        val client = ClientConfiguration.instance
+        val endpoint = "https://api.pwnedpasswords.com/range/$prefix"
+        val response = client.get<String>(endpoint)
+        
+        val delimiter = ':'
+        val breached = response.lineSequence().map { line -> line.dropLastWhile { it != delimiter }.dropLast(1) }
+        
+        return breached.any { hash.endsWith(it) }
+    }
+    
+    fun ByteArray.toHex(): String {
+        return StringBuilder().also { builder ->
+            this.map { byte -> byte.toInt() }.forEach { bits ->
+                val shift = 0x4
+                val mask = 0xf
+                val radix = 0x10
+                val high = bits shr shift and mask
+                val low = bits and mask
+                builder.append(high.toString(radix))
+                builder.append(low.toString(radix))
+            }
+        }.toString()
     }
 }
