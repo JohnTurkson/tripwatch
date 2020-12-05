@@ -26,11 +26,11 @@ sealed class Response {
     }
     
     @Serializable
-    @SerialName("Error")
-    sealed class Error : Response() {
+    @SerialName("ClientError")
+    sealed class ClientError : Response() {
         @Serializable
         @SerialName("BadRequest")
-        sealed class BadRequest : Error() {
+        sealed class BadRequest : ClientError() {
             @Transient
             override val statusCode: Int = 400
             
@@ -39,25 +39,33 @@ sealed class Response {
             object InvalidRequestError : BadRequest()
             
             @Serializable
-            @SerialName("EmailAlreadyTakenError")
-            data class EmailAlreadyTakenError(val email: String) : BadRequest()
+            @SerialName("InvalidEmailError")
+            object InvalidEmailError : BadRequest()
             
             @Serializable
-            @SerialName("UsernameAlreadyTakenError")
-            data class UsernameAlreadyTakenError(val username: String) : BadRequest()
+            @SerialName("EmailAlreadyTakenError")
+            object EmailAlreadyTakenError : BadRequest()
             
             @Serializable
             @SerialName("PasswordTooShortError")
-            data class PasswordTooShortError(val password: String) : BadRequest()
+            object PasswordTooShortError : BadRequest()
+    
+            @Serializable
+            @SerialName("PasswordTooLongError")
+            object PasswordTooLongError : BadRequest()
+            
+            @Serializable
+            @SerialName("CommonPasswordError")
+            object CommonPasswordError : BadRequest()
             
             @Serializable
             @SerialName("BreachedPasswordError")
-            data class BreachedPasswordError(val password: String) : BadRequest()
+            object BreachedPasswordError : BadRequest()
         }
         
         @Serializable
         @SerialName("Unauthorized")
-        sealed class Unauthorized : Error() {
+        sealed class Unauthorized : ClientError() {
             @Transient
             override val statusCode: Int = 401
             
@@ -65,7 +73,7 @@ sealed class Response {
         
         @Serializable
         @SerialName("Forbidden")
-        sealed class Forbidden : Error() {
+        sealed class Forbidden : ClientError() {
             @Transient
             override val statusCode: Int = 403
             
@@ -73,7 +81,7 @@ sealed class Response {
         
         @Serializable
         @SerialName("NotFound")
-        sealed class NotFound : Error() {
+        sealed class NotFound : ClientError() {
             @Transient
             override val statusCode: Int = 404
             
@@ -81,10 +89,21 @@ sealed class Response {
         
         @Serializable
         @SerialName("TooManyRequests")
-        sealed class TooManyRequests : Error() {
+        sealed class TooManyRequests : ClientError() {
             @Transient
             override val statusCode: Int = 429
             
+        }
+    }
+    
+    @Serializable
+    @SerialName("ServerError")
+    sealed class ServerError : Response() {
+        @Serializable
+        @SerialName("InternalServerError")
+        object InternalServerError : ServerError() {
+            @Transient
+            override val statusCode: Int = 500
         }
     }
 }
