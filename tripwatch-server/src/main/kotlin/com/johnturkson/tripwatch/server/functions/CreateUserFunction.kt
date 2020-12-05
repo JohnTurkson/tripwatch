@@ -1,7 +1,6 @@
 package com.johnturkson.tripwatch.server.functions
 
 import com.johnturkson.tripwatch.common.data.User
-import com.johnturkson.tripwatch.common.data.UserData
 import com.johnturkson.tripwatch.common.requests.Request
 import com.johnturkson.tripwatch.common.requests.Request.CreateUserRequest
 import com.johnturkson.tripwatch.common.responses.Response

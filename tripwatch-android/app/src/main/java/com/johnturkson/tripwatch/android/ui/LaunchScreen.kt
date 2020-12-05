@@ -18,8 +18,10 @@ import androidx.compose.ui.unit.dp
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
 import com.johnturkson.tripwatch.android.utils.requestLogIn
-import com.johnturkson.tripwatch.common.data.UserData
 import com.johnturkson.tripwatch.common.responses.Response.Success.OK.CreateUserResponse
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 private val loginClicked = mutableStateOf(false)
@@ -37,8 +39,6 @@ fun LaunchScreen(appContainer : AppContainer, navigationViewModel: NavigationVie
             verticalArrangement = Arrangement.SpaceEvenly) {
 
         Image(imageResource(R.drawable.trip_watch))
-
-        Text("Hello World!", color = MaterialTheme.colors.primary)
 
         Column(modifier=Modifier.fillMaxWidth(), horizontalAlignment=Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
 
@@ -95,40 +95,34 @@ private fun LoginButton(appContainer : AppContainer, navigateTo : (Screen) -> Un
                 backgroundColor = MaterialTheme.colors.primary
             ),
             onClick = {
-                loginClicked.value = true
-                /*
                 HandleLogIn(
                     appContainer = appContainer,
-                    userData = UserData(
-                        emailTextState.value.text,
-                        "",
-                        passwordTextState.value.text
-                    ),
+                    emailTextState.value.text,
+                    passwordTextState.value.text,
                     navigateTo = navigateTo
                 )
-                */
-                navigateTo(Screen.Home)
             }) {
 
             Text("Log In")
         }
 }
 
-private fun HandleLogIn(appContainer : AppContainer, userData : UserData, navigateTo : (Screen) -> Unit) {
+private fun HandleLogIn(appContainer : AppContainer, email : String, password : String, navigateTo : (Screen) -> Unit) {
     emailValid.value = emailTextState.value.text.count() > 0 && "@" in emailTextState.value.text
     passwordValid.value = passwordTextState.value.text.count() > 0
 
     if(emailValid.value && passwordValid.value) {
-        val response = runBlocking {
-            requestLogIn(userData)
-        }
+         GlobalScope.launch {
+            val response = requestLogIn(email, password)
+             loginClicked.value = true
 
-        when(response) {
-            is CreateUserResponse -> {
-                loginSuccess.value = true
-                appContainer.userData = response.user
-                navigateTo(Screen.Home)
-            }
+             when(response) {
+                 is CreateUserResponse -> {
+                     loginSuccess.value = true
+                     appContainer.userData = response.user
+                     navigateTo(Screen.Home)
+                 }
+             }
         }
     }
 }
