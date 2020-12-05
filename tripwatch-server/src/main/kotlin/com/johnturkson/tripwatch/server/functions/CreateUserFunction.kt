@@ -70,7 +70,7 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         }
         
         val user = User(generateId(), email)
-        val data = UserData(generateId(), user.email, generatePasswordHash(password), false)
+        val data = UserData(user.id, user.email, generatePasswordHash(password), false)
         
         val putUserRequest = PutItemRequest("TripWatchUsers", data)
         
