@@ -20,7 +20,7 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
     override fun HttpRequest.decode(): Request? {
         return when (val body = this.decodeBody()) {
             null -> null
-            else -> serializer.decodeFromString(Request.serializer(), body)
+            else -> runCatching { serializer.decodeFromString(Request.serializer(), body) }.getOrNull()
         }
     }
     
