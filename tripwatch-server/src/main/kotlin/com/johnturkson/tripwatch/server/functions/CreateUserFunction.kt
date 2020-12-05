@@ -1,16 +1,22 @@
 package com.johnturkson.tripwatch.server.functions
 
+import com.johnturkson.awstools.dynamodb.requestbuilder.requests.PutItemRequest
 import com.johnturkson.tripwatch.common.data.User
-import com.johnturkson.tripwatch.common.data.UserData
 import com.johnturkson.tripwatch.common.requests.Request
 import com.johnturkson.tripwatch.common.requests.Request.CreateUserRequest
 import com.johnturkson.tripwatch.common.responses.Response
-import com.johnturkson.tripwatch.common.responses.Response.Error.BadRequest.InvalidRequestError
+import com.johnturkson.tripwatch.common.responses.Response.ClientError.BadRequest.*
+import com.johnturkson.tripwatch.common.responses.Response.ServerError.InternalServerError
 import com.johnturkson.tripwatch.common.responses.Response.Success.OK.CreateUserResponse
+import com.johnturkson.tripwatch.server.configuration.DatabaseRequestHandler
+import com.johnturkson.tripwatch.server.configuration.SerializerConfiguration
+import com.johnturkson.tripwatch.server.data.UserData
 import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.security.MessageDigest
 import java.util.Base64
@@ -18,7 +24,7 @@ import kotlin.random.Random
 import kotlin.random.nextInt
 
 class CreateUserFunction : HttpLambdaFunction<Request, Response> {
-    override val serializer = Json { ignoreUnknownKeys = true }
+    override val serializer = SerializerConfiguration.instance
     
     override fun HttpRequest.decode(): Request? {
         return when (val body = this.decodeBody()) {
@@ -29,7 +35,7 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
     
     override fun Request?.process(): Response {
         return when (this) {
-            is CreateUserRequest -> createUser(this.data)
+            is CreateUserRequest -> runBlocking { createUser(email, password) }
             else -> InvalidRequestError
         }
     }
@@ -42,18 +48,44 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         return HttpResponse(statusCode, headers, body, isBase64Encoded)
     }
     
-    fun createUser(data: UserData): Response {
-        // TODO check if username is taken
-        // TODO check if email is taken
-        // TODO check password
-        val user = User(generateUserId(), data.email, data.username)
-        // TODO add user to database
+    suspend fun createUser(email: String, password: String): Response {
+        if (email.isInvalidEmail()) return InvalidEmailError
+        if (password.isTooShort()) return PasswordTooShortError
+        if (password.isTooLong()) return PasswordTooLongError
+        if (password.isCommonPassword()) return CommonPasswordError
+        if (password.isBreached()) return BreachedPasswordError
+        
+        val handler = DatabaseRequestHandler.instance
+        
+        val putEmailRequest = PutItemRequest(
+            "TripWatchUserEmails",
+            mapOf("email" to email),
+            conditionExpression = "attribute_not_exists(email)",
+        )
+        
+        runCatching {
+            handler.putItem(putEmailRequest, MapSerializer(String.serializer(), String.serializer()))
+        }.onFailure {
+            return EmailAlreadyTakenError
+        }
+        
+        val user = User(generateId(), email)
+        val data = UserData(generateId(), user.email, generatePasswordHash(password), false)
+        
+        val putUserRequest = PutItemRequest("TripWatchUsers", data)
+        
+        runCatching {
+            handler.putItem(putUserRequest, UserData.serializer())
+        }.onFailure {
+            return InternalServerError
+        }
+        
         // TODO send verification email
         
         return CreateUserResponse(user)
     }
     
-    fun generateUserId(length: Int = 16): String {
+    fun generateId(length: Int = 16): String {
         var id = ""
         repeat(length) { id += Random.nextInt(0..0xf).toString(0x10) }
         return id
@@ -66,4 +98,41 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         val encoder = BCryptPasswordEncoder()
         return encoder.encode(prehashHex)
     }
+    
+    private fun String.isInvalidEmail(): Boolean {
+        // TODO
+        return false
+    }
+    
+    private fun String.isTooShort(): Boolean {
+        return this.length < 10
+    }
+    
+    private fun String.isTooLong(): Boolean {
+        return this.length > 1000
+    }
+    
+    private fun String.isCommonPassword(): Boolean {
+        // TODO
+        return false
+    }
+    
+    private fun String.isBreached(): Boolean {
+        // TODO
+        return false
+    }
+}
+
+
+suspend fun main() {
+    operator fun String.times(value: Int): String {
+        var s = ""
+        repeat(value) {
+            s += this
+        }
+    
+        return s
+    }
+    
+    CreateUserFunction().createUser("2", "11" * 100)
 }
