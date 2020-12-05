@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+
     compileSdkVersion(30)
 
     defaultConfig {
@@ -61,4 +62,10 @@ dependencies {
     androidTestImplementation("com.android.support.test:runner:1.0.2")
     androidTestImplementation("com.android.support.test.espresso:espresso-core:3.0.2")
     androidTestImplementation("androidx.compose.ui:ui-test:1.0.0-alpha08")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
+    implementation("io.ktor:ktor-client-cio:1.4.0")
+    implementation("io.ktor:ktor-client-serialization-jvm:1.4.0")
+    implementation("io.ktor:ktor-client-android:1.4.0")
+
+    implementation(project(":tripwatch-common"))
 }

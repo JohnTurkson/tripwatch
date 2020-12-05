@@ -10,10 +10,10 @@ import androidx.compose.ui.graphics.Color
 private val LightThemeColors = lightColors(
         primary = TeaGreen,
         primaryVariant = FernGreen,
-        onPrimary = Color.White,
+        onPrimary = CulturedWhite,
         secondary = BeauBlue,
         secondaryVariant = HonululuBlue,
-        onSecondary = Color.White,
+        onSecondary = CulturedWhite,
         error = Red800
 )
 
@@ -22,7 +22,7 @@ private val DarkThemeColors = darkColors(
         primaryVariant = FernGreen,
         onPrimary = Color.Black,
         secondary = BeauBlue,
-        onSecondary = Color.White,
+        onSecondary = CulturedWhite,
         error = Red800
 )
 
