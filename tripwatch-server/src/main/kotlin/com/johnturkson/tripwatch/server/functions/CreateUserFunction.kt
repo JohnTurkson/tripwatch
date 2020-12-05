@@ -122,17 +122,3 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         return false
     }
 }
-
-
-suspend fun main() {
-    operator fun String.times(value: Int): String {
-        var s = ""
-        repeat(value) {
-            s += this
-        }
-    
-        return s
-    }
-    
-    CreateUserFunction().createUser("2", "11" * 100)
-}
