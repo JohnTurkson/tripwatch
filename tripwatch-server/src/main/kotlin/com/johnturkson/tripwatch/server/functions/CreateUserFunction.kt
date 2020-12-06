@@ -94,9 +94,9 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
     }
     
     fun generatePasswordHash(password: String): String {
-        val prehashAlgorithm = "SHA-512"
+        val prehashAlgorithm = "SHA-256"
         val prehashBytes = MessageDigest.getInstance(prehashAlgorithm).digest(password.toByteArray())
-        val prehashHex = Base64.getEncoder().encodeToString(prehashBytes)
+        val prehashHex = prehashBytes.toHex()
         val encoder = BCryptPasswordEncoder()
         return encoder.encode(prehashHex)
     }
@@ -112,11 +112,6 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
     
     fun String.isTooLong(): Boolean {
         return this.length > 1000
-    }
-    
-    fun String.isCommonPassword(): Boolean {
-        // TODO
-        return false
     }
     
     suspend fun String.isBreached(): Boolean {
