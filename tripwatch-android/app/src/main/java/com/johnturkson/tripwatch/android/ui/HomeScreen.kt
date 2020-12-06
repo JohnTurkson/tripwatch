@@ -13,7 +13,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -29,8 +31,7 @@ import com.johnturkson.tripwatch.common.data.Trip
 @Composable
 fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewModel) {
 
-    Scaffold(backgroundColor = MaterialTheme.colors.primarySurface,
-            bottomBar = { BottomBar(navigationViewModel::navigateTo) }) { innerPadding ->
+    Scaffold(bottomBar = { BottomBar(navigationViewModel::navigateTo) }) { innerPadding ->
 
         ScrollableColumn(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(innerPadding)) {
@@ -109,15 +110,15 @@ fun BottomBar(navigateTo : (Screen) -> Unit) {
     val tabs = HomeTabs.values()
     val (selectedTab, setSelectedTab) = remember { mutableStateOf(HomeTabs.HOME) }
 
-    BottomNavigation(modifier = Modifier.padding(16.dp)) {
+    BottomNavigation(modifier = Modifier.preferredHeight(64.dp)) {
         tabs.forEach { tab ->
             BottomNavigationItem(
-                icon = { Icon(vectorResource(tab.icon)) },
+                icon = { Icon(imageResource(tab.icon)) },
                 selected = tab == selectedTab,
                 onClick = { setSelectedTab(tab) },
-                alwaysShowLabels = false,
-                selectedContentColor = MaterialTheme.colors.primary,
-                unselectedContentColor = AmbientContentColor.current)
+                label = { Text(text = stringResource(tab.title)) },
+                selectedContentColor = MaterialTheme.colors.secondary,
+                unselectedContentColor = MaterialTheme.colors.onPrimary)
         }
     }
 }
@@ -126,7 +127,7 @@ enum class HomeTabs(
     @StringRes val title: Int,
     @DrawableRes val icon: Int
 ) {
-    HOME(R.string.home, R.drawable.person_icon),
     TRIP_WATCHER(R.string.trip_watcher, R.drawable.mountains_icon),
+    HOME(R.string.home, R.drawable.home_icon),
     PROFILE(R.string.profile, R.drawable.person_icon)
 }
