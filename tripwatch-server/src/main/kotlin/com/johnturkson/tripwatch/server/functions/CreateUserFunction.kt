@@ -21,14 +21,17 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.security.MessageDigest
-import java.util.Base64
 import kotlin.random.Random
 import kotlin.random.nextInt
 
 class CreateUserFunction : HttpLambdaFunction<Request, Response> {
-    override val serializer = SerializerConfiguration.instance
+    private val serializer = SerializerConfiguration.instance
     
-    override fun HttpRequest.decode(): Request? {
+    override fun String.decodeHttpRequest(): HttpRequest? {
+        return runCatching { serializer.decodeFromString(HttpRequest.serializer(), this) }.getOrNull()
+    }
+    
+    override fun HttpRequest.decodeTypedRequest(): Request? {
         return when (val body = this.decodeBody()) {
             null -> null
             else -> runCatching { serializer.decodeFromString(Request.serializer(), body) }.getOrNull()
@@ -42,7 +45,7 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         }
     }
     
-    override fun Response.encode(): HttpResponse {
+    override fun Response.encodeTypedResponse(): HttpResponse {
         val statusCode = this.statusCode
         val headers = mapOf("Content-Type" to "application/json")
         val body = serializer.encodeToString(Response.serializer(), this)
@@ -50,11 +53,14 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         return HttpResponse(statusCode, headers, body, isBase64Encoded)
     }
     
+    override fun HttpResponse.encodeHttpResponse(): String {
+        return serializer.encodeToString(HttpResponse.serializer(), this)
+    }
+    
     suspend fun createUser(email: String, password: String): Response {
         if (email.isInvalidEmail()) return InvalidEmailError
         if (password.isTooShort()) return PasswordTooShortError
         if (password.isTooLong()) return PasswordTooLongError
-        if (password.isCommonPassword()) return CommonPasswordError
         if (password.isBreached()) return BreachedPasswordError
         
         val handler = DatabaseRequestHandler.instance

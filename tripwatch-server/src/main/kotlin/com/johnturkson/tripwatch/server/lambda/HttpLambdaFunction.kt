@@ -1,20 +1,23 @@
 package com.johnturkson.tripwatch.server.lambda
 
-import kotlinx.serialization.json.Json
-import java.util.*
+import java.util.Base64
 
-interface HttpLambdaFunction<T, R> : LambdaFunction {
-    val serializer: Json
-    
-    override fun processInput(input: String): String {
-        val request = input.decode()
-        val response = processRequest(request)
-        return response.encode()
+interface HttpLambdaFunction<T, R> : LambdaFunction<T, R> {
+    override fun String.decode(): T? {
+        return this.decodeHttpRequest()?.decodeTypedRequest()
     }
     
-    fun String.decode() : HttpRequest {
-        return serializer.decodeFromString(HttpRequest.serializer(), this)
+    override fun R.encode(): String {
+        return this.encodeTypedResponse().encodeHttpResponse()
     }
+    
+    fun String.decodeHttpRequest(): HttpRequest?
+    
+    fun HttpRequest.decodeTypedRequest(): T?
+    
+    fun R.encodeTypedResponse(): HttpResponse
+    
+    fun HttpResponse.encodeHttpResponse(): String
     
     fun HttpRequest.decodeBody(): String? {
         return when {
@@ -23,18 +26,4 @@ interface HttpLambdaFunction<T, R> : LambdaFunction {
             else -> body
         }
     }
-    
-    fun HttpResponse.encode(): String {
-        return serializer.encodeToString(HttpResponse.serializer(), this)
-    }
-    
-    fun processRequest(request: HttpRequest) : HttpResponse {
-        return request.decode().process().encode()
-    }
-    
-    fun HttpRequest.decode(): T?
-    
-    fun T?.process(): R
-    
-    fun R.encode(): HttpResponse
 }
