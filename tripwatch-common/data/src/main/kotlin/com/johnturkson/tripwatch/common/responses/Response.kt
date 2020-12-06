@@ -49,14 +49,10 @@ sealed class Response {
             @Serializable
             @SerialName("PasswordTooShortError")
             object PasswordTooShortError : BadRequest()
-    
+            
             @Serializable
             @SerialName("PasswordTooLongError")
             object PasswordTooLongError : BadRequest()
-            
-            @Serializable
-            @SerialName("CommonPasswordError")
-            object CommonPasswordError : BadRequest()
             
             @Serializable
             @SerialName("BreachedPasswordError")
