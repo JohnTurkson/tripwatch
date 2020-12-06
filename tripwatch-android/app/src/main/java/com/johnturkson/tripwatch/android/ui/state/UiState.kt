@@ -11,6 +11,9 @@ data class UiState<T>(val loading : Boolean = false,
 
     val isInitialLoad : Boolean
         get() = data == null && loading && !hasError
+
+    val isLoaded : Boolean
+        get() = data != null && !loading && !hasError
 }
 
 fun <T> UiState<T>.copyWithResult(value: Result<T>): UiState<T> {

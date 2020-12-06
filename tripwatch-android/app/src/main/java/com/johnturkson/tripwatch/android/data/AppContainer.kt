@@ -8,4 +8,5 @@ class AppContainer(private val applicationContext : Context) {
     lateinit var userData : User
 
     lateinit var tripDataList : List<Trip>
+    lateinit var selectedTripData : Trip
 }

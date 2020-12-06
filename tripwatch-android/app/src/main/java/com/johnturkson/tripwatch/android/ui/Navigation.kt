@@ -63,6 +63,9 @@ private fun Bundle.toScreen(): Screen {
     }
 }
 
+val DEFAULT_SCREEN = Screen.Home
+//val DEFAULT_SCREEN = Screen.Launch("")
+
 class NavigationViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     /**
      * Hold the current screen in an observable, restored from savedStateHandle after process
@@ -73,7 +76,7 @@ class NavigationViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
      */
     var currentScreen: Screen by savedStateHandle.getMutableStateOf<Screen>(
         key = SIS_SCREEN,
-        default = Screen.Launch(""),
+        default = DEFAULT_SCREEN,
         save = { it.toBundle() },
         restore = { it.toScreen() }
     )

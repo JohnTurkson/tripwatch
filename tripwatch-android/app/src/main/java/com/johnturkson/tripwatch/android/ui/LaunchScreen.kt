@@ -17,17 +17,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
-import com.johnturkson.tripwatch.android.utils.requestLogIn
-import com.johnturkson.tripwatch.common.responses.Response.Success.OK.CreateUserResponse
+import com.johnturkson.tripwatch.android.utils.*
+import com.johnturkson.tripwatch.common.responses.Response.ClientError
+import com.johnturkson.tripwatch.common.responses.Response.Success
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 private val loginClicked = mutableStateOf(false)
 private val emailValid = mutableStateOf(false)
 private val passwordValid = mutableStateOf(false)
 private val loginSuccess = mutableStateOf(false)
+private val errorString = mutableStateOf("")
 
 private val emailTextState =  mutableStateOf(TextFieldValue())
 private val passwordTextState =  mutableStateOf(TextFieldValue())
@@ -49,16 +49,7 @@ fun LaunchScreen(appContainer : AppContainer, navigationViewModel: NavigationVie
 
             Text(
                 textAlign = TextAlign.Center,
-                text = if (!emailValid.value && loginClicked.value) "You have entered an invalid email" else "",
-                color = MaterialTheme.colors.error)
-
-            Text(
-                textAlign = TextAlign.Center,
-                text = if (!passwordValid.value && loginClicked.value) "You have entered an invalid password" else "",
-                color = MaterialTheme.colors.error)
-
-            Text(
-                text = if (!loginSuccess.value && passwordValid.value && emailValid.value && loginClicked.value) "There was a problem communicating with the server. Try again later" else "",
+                text = errorString.value,
                 color = MaterialTheme.colors.error)
 
             LoginButton(appContainer, navigationViewModel::navigateTo)
@@ -74,7 +65,10 @@ private fun EmailTextBox(value : TextFieldValue, onValueChange : (TextFieldValue
                 onValueChange = onValueChange,
                 label = { Text("Email") },
                 leadingIcon = { Image(Icons.Filled.Email) },
+                errorColor = MaterialTheme.colors.error,
                 isErrorValue = !emailValid.value && loginClicked.value)
+
+
 }
 
 @Composable
@@ -90,39 +84,51 @@ private fun PasswordTextBox(value : TextFieldValue, onValueChange : (TextFieldVa
 
 @Composable
 private fun LoginButton(appContainer : AppContainer, navigateTo : (Screen) -> Unit) {
-        Button(
-            colors = ButtonConstants.defaultButtonColors(
-                backgroundColor = MaterialTheme.colors.primary
-            ),
-            onClick = {
-                HandleLogIn(
-                    appContainer = appContainer,
-                    emailTextState.value.text,
-                    passwordTextState.value.text,
-                    navigateTo = navigateTo
-                )
-            }) {
+    Button(
+        colors = ButtonConstants.defaultButtonColors(
+            backgroundColor = MaterialTheme.colors.primary
+        ),
+        onClick = {
+            handleLogIn(
+                appContainer = appContainer,
+                emailTextState.value.text,
+                passwordTextState.value.text,
+                navigateTo = navigateTo
+            )
+        }) {
 
-            Text("Log In")
-        }
+        Text("Log In")
+    }
 }
 
-private fun HandleLogIn(appContainer : AppContainer, email : String, password : String, navigateTo : (Screen) -> Unit) {
+private fun handleLogIn(appContainer : AppContainer, email : String, password : String, navigateTo : (Screen) -> Unit) {
     emailValid.value = emailTextState.value.text.count() > 0 && "@" in emailTextState.value.text
     passwordValid.value = passwordTextState.value.text.count() > 0
 
     if(emailValid.value && passwordValid.value) {
          GlobalScope.launch {
-            val response = requestLogIn(email, password)
+            val response = createAccount(email, password)
              loginClicked.value = true
 
              when(response) {
-                 is CreateUserResponse -> {
+                 is Success.OK.CreateUserResponse -> {
                      loginSuccess.value = true
                      appContainer.userData = response.user
                      navigateTo(Screen.Home)
                  }
+
+                 is ClientError.BadRequest -> errorString.value = LOGIN_AUTH_ERROR
+                 else -> errorString.value = LOGIN_SERVER_ERROR
              }
+        }
+    }
+    else {
+        if(emailValid.value || passwordValid.value) {
+            errorString.value = if(!emailValid.value) LOGIN_USERNAME_ERROR else ""
+            errorString.value = if(!passwordValid.value) LOGIN_PASSWORD_ERROR else ""
+        }
+        else {
+            errorString.value = LOGIN_AUTH_ERROR
         }
     }
 }
