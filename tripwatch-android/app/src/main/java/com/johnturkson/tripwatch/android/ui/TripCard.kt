@@ -54,22 +54,15 @@ fun TripPeople(tripData : Trip) {
 }
 
 @Composable
-fun TripCard(tripData : Trip, width : Int, height : Int, onClick : () -> Unit) {
-    Box(modifier = Modifier.padding(16.dp)
-        .preferredWidth(width.dp)
-        .preferredHeight(height.dp)) {
-
-        Box(modifier = Modifier.fillMaxWidth()) {
+fun TripCard(tripData : Trip, modifier : Modifier, onClick : () -> Unit) {
+    Box(modifier = modifier) {
+        Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             TripImage(tripData, onClick)
 
             Box(modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
                 Text(
                     text = tripData.tripName,
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 28.sp,
-                        color = MaterialTheme.colors.onPrimary
-                    )
+                    style = MaterialTheme.typography.subtitle1
                 )
             }
 

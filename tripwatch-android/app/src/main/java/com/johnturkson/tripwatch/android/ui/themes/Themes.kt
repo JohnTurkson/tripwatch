@@ -31,5 +31,6 @@ fun TripwatchTheme(darkTheme : Boolean = isSystemInDarkTheme(), content : @Compo
     MaterialTheme(
             colors = if(darkTheme) DarkThemeColors else LightThemeColors,
             shapes = TripwatchShapes,
+            typography = TripwatchTypography,
             content = content)
 }
