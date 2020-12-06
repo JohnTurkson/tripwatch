@@ -108,8 +108,13 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
     }
     
     fun String.isInvalidEmail(): Boolean {
-        // TODO
-        return false
+        fun String.isValidEmailComponent(): Boolean {
+            return all { it.isLetterOrDigit() || it == '.' || it == '+' || it == '-' }
+        }
+        
+        return this.length <= 250 && with(this.split('@')) {
+            length == 2 && all { it.isValidEmailComponent() }
+        }
     }
     
     fun String.isTooShort(): Boolean {
