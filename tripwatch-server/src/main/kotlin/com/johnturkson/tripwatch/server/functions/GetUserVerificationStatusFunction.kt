@@ -2,21 +2,21 @@ package com.johnturkson.tripwatch.server.functions
 
 import com.johnturkson.awstools.dynamodb.objectbuilder.buildDynamoDBObject
 import com.johnturkson.awstools.dynamodb.requestbuilder.requests.GetItemRequest
-import com.johnturkson.tripwatch.common.data.User
 import com.johnturkson.tripwatch.common.requests.Request
-import com.johnturkson.tripwatch.common.requests.Request.GetUserRequest
+import com.johnturkson.tripwatch.common.requests.Request.GetUserVerificationStatusRequest
 import com.johnturkson.tripwatch.common.responses.Response
 import com.johnturkson.tripwatch.common.responses.Response.ClientError.BadRequest.InvalidRequestError
-import com.johnturkson.tripwatch.common.responses.Response.ClientError.NotFound.UserNotFoundError
-import com.johnturkson.tripwatch.common.responses.Response.Success.OK.GetUserResponse
+import com.johnturkson.tripwatch.common.responses.Response.ClientError.Forbidden.InvalidCredentialsError
+import com.johnturkson.tripwatch.common.responses.Response.Success.OK.GetUserVerificationStatusResponse
 import com.johnturkson.tripwatch.server.configuration.DatabaseRequestHandler
 import com.johnturkson.tripwatch.server.configuration.SerializerConfiguration
+import com.johnturkson.tripwatch.server.data.UserData
 import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
 import kotlinx.coroutines.runBlocking
 
-class GetUserFunction : HttpLambdaFunction<Request, Response> {
+class GetUserVerificationStatusFunction : HttpLambdaFunction<Request, Response> {
     private val serializer = SerializerConfiguration.instance
     
     override fun String.decodeHttpRequest(): HttpRequest? {
@@ -44,29 +44,29 @@ class GetUserFunction : HttpLambdaFunction<Request, Response> {
     
     override fun Request?.process(): Response {
         return when (this) {
-            is GetUserRequest -> runBlocking { getUser(user) }
+            is GetUserVerificationStatusRequest -> runBlocking { getUserVerificationStatus(user) }
             else -> InvalidRequestError
         }
     }
     
-    suspend fun getUser(user: String): Response {
+    suspend fun getUserVerificationStatus(user: String): Response {
         // TODO authorization
         
         val handler = DatabaseRequestHandler.instance
         
-        val getUserRequest = GetItemRequest(
+        val getUserDataRequest = GetItemRequest(
             "TripWatchUsers",
             buildDynamoDBObject {
                 put("id", user)
             },
         )
         
-        val getUserResponse = runCatching {
-            handler.getItem(getUserRequest, User.serializer())
+        val getUserDataResponse = runCatching {
+            handler.getItem(getUserDataRequest, UserData.serializer())
         }.getOrElse {
-            return UserNotFoundError(user)
+            return InvalidCredentialsError
         }
         
-        return GetUserResponse(getUserResponse.item)
+        return GetUserVerificationStatusResponse(getUserDataResponse.item.verified)
     }
 }

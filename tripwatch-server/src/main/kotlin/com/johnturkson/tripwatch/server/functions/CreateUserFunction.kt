@@ -15,7 +15,7 @@ import com.johnturkson.tripwatch.server.data.UserData
 import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
-import io.ktor.client.request.*
+import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
@@ -38,13 +38,6 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         }
     }
     
-    override fun Request?.process(): Response {
-        return when (this) {
-            is CreateUserRequest -> runBlocking { createUser(email, password) }
-            else -> InvalidRequestError
-        }
-    }
-    
     override fun Response.encodeTypedResponse(): HttpResponse {
         val statusCode = this.statusCode
         val headers = mapOf("Content-Type" to "application/json")
@@ -55,6 +48,13 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
     
     override fun HttpResponse.encodeHttpResponse(): String {
         return serializer.encodeToString(HttpResponse.serializer(), this)
+    }
+    
+    override fun Request?.process(): Response {
+        return when (this) {
+            is CreateUserRequest -> runBlocking { createUser(email, password) }
+            else -> InvalidRequestError
+        }
     }
     
     suspend fun createUser(email: String, password: String): Response {
@@ -88,12 +88,13 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
             return InternalServerError
         }
         
-        // TODO send verification email
+        SendVerificationEmailFunction().sendVerificationEmail(user.id)
         
         return CreateUserResponse(user)
     }
     
-    fun generateId(length: Int = 16): String {
+    fun generateId(): String {
+        val length = 16
         var id = ""
         repeat(length) { id += Random.nextInt(0..0xf).toString(0x10) }
         return id

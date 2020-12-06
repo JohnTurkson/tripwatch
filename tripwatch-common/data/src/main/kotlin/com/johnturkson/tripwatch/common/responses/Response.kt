@@ -22,6 +22,18 @@ sealed class Response {
             @Serializable
             @SerialName("CreateUserResponse")
             data class CreateUserResponse(val user: User) : OK()
+            
+            @Serializable
+            @SerialName("GetUserResponse")
+            data class GetUserResponse(val user: User) : OK()
+            
+            @Serializable
+            @SerialName("GetUserVerificationStatusResponse")
+            data class GetUserVerificationStatusResponse(val verified: Boolean) : OK()
+            
+            @Serializable
+            @SerialName("SendVerificationEmailResponse")
+            object SendVerificationEmailResponse : OK()
         }
     }
     
@@ -57,6 +69,10 @@ sealed class Response {
             @Serializable
             @SerialName("BreachedPasswordError")
             object BreachedPasswordError : BadRequest()
+            
+            @Serializable
+            @SerialName("UserAlreadyVerifiedError")
+            object UserAlreadyVerifiedError : BadRequest()
         }
         
         @Serializable
@@ -73,6 +89,9 @@ sealed class Response {
             @Transient
             override val statusCode: Int = 403
             
+            @Serializable
+            @SerialName("InvalidCredentialsError")
+            object InvalidCredentialsError : Forbidden()
         }
         
         @Serializable
@@ -81,6 +100,9 @@ sealed class Response {
             @Transient
             override val statusCode: Int = 404
             
+            @Serializable
+            @SerialName("UserNotFoundError")
+            data class UserNotFoundError(val id: String) : NotFound()
         }
         
         @Serializable
@@ -89,6 +111,9 @@ sealed class Response {
             @Transient
             override val statusCode: Int = 429
             
+            @Serializable
+            @SerialName("RateLimitedError")
+            object RateLimitedError : TooManyRequests()
         }
     }
     
