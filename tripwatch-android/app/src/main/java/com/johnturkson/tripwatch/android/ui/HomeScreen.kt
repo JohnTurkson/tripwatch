@@ -6,100 +6,91 @@ import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
+import com.johnturkson.tripwatch.android.utils.getFeaturedTripsForUser
+import com.johnturkson.tripwatch.android.utils.getPlannedTripsFromUserId
+import com.johnturkson.tripwatch.android.utils.getWatchedTripsFromUserId
 import com.johnturkson.tripwatch.common.data.Trip
+import com.johnturkson.tripwatch.common.data.User
+import com.johnturkson.tripwatch.common.data.UserTrip
 
 @Composable
 fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewModel) {
 
+    // TODO remove, for debug
+    appContainer.userData = User("12345678", "solarcactus@live.com")
+
+    appContainer.featuredTripDataList = getFeaturedTripsForUser(appContainer.userData.id)
+    appContainer.watchedTripDataList = getWatchedTripsFromUserId(appContainer.userData.id)
+    appContainer.plannedTripDataList = getPlannedTripsFromUserId(appContainer.userData.id)
+
     Scaffold(bottomBar = { BottomBar(navigationViewModel::navigateTo) }) { innerPadding ->
+        ScrollableColumn(modifier = Modifier.padding(innerPadding).fillMaxWidth()) {
+            Column {
 
-        ScrollableColumn(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(innerPadding)) {
-
-                Spacer(modifier = Modifier.preferredHeight(32.dp))
+                Spacer(modifier = Modifier.preferredHeight(16.dp))
                 Text(
-                    text = "Explore Trips",
+                    text = "Trips to check out",
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.h1
+                    style = MaterialTheme.typography.h2
                 )
 
-                val tripCardModifier =
-                    Modifier.fillMaxWidth().preferredWidth(256.dp).preferredHeight(192.dp)
-
-                TripCard(
-                    Trip(
-                        "Lindeman Lake Trail",
-                        emptyList(),
-                        "https://upload.wikimedia.org/wikipedia/commons/3/32/Lindeman_Lake.jpg"
-                    ),
-                    tripCardModifier.align(Alignment.CenterHorizontally),
-                    {}
-                )
-
+                FeaturedTripCards(trips = appContainer.featuredTripDataList,
+                    navigateTo = navigationViewModel::navigateTo,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                        .preferredWidth(384.dp).preferredHeight(320.dp))
 
                 Text(
                     text = "Trips you're watching",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.h1
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.h2
                 )
 
-                ScrollableRow {
-                    Row {
-                        for (i in 0..2) {
-                            TripCard(
-                                Trip(
-                                    "St. Marks Summit",
-                                    emptyList(),
-                                    "https://i.redd.it/van9afvxq0j31.jpg"
-                                ),
-                                tripCardModifier,
-                                {}
-                            )
-                        }
-                    }
-                }
+                UserTripCardDisplay(trips = appContainer.watchedTripDataList,
+                    navigateTo = navigationViewModel::navigateTo,
+                    modifier = Modifier.preferredWidth(256.dp).preferredHeight(192.dp))
 
                 Text(
                     text = "Trips you've planned",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.h1
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.h2
                 )
 
-                ScrollableRow {
-                    Row {
-                        for (i in 0..2) {
-                            TripCard(
-                                Trip(
-                                    "Evan's Peak",
-                                    emptyList(),
-                                    "https://www.ashikaparsad.com/wp-content/uploads/2015/05/View-of-Blanshard-and-Edge-Peaks-from-Evans-Peak-1024x683.jpg"
-                                ),
-                                tripCardModifier,
-                                {}
-                            )
-                        }
-                    }
-                }
+                UserTripCardDisplay(trips = appContainer.plannedTripDataList,
+                    navigateTo = navigationViewModel::navigateTo,
+                    modifier = Modifier.preferredWidth(256.dp).preferredHeight(192.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun FeaturedTripCards(trips : List<Trip>, navigateTo : (Screen) -> Unit, modifier : Modifier) {
+    TripCard(trips[0], modifier = modifier.fillMaxWidth(), onClick = {
+        navigateTo(Screen.Home)
+    })
+}
+
+@Composable
+fun UserTripCardDisplay(trips : List<UserTrip>, navigateTo : (Screen) -> Unit, modifier : Modifier) {
+    ScrollableRow {
+        Row {
+            trips.forEach { trip ->
+                UserTripCard(
+                    userTripData = trip,
+                    modifier = modifier,
+                    onClick = {
+                        navigateTo(Screen.Home)
+                })
             }
         }
     }
@@ -115,7 +106,13 @@ fun BottomBar(navigateTo : (Screen) -> Unit) {
             BottomNavigationItem(
                 icon = { Icon(imageResource(tab.icon)) },
                 selected = tab == selectedTab,
-                onClick = { setSelectedTab(tab) },
+                onClick = {
+                            if(selectedTab.screen != tab.screen) {
+                                setSelectedTab(tab)
+                                navigateTo(tab.screen)
+                            }
+                          },
+
                 label = { Text(text = stringResource(tab.title)) },
                 selectedContentColor = MaterialTheme.colors.secondary,
                 unselectedContentColor = MaterialTheme.colors.onPrimary)
@@ -125,9 +122,10 @@ fun BottomBar(navigateTo : (Screen) -> Unit) {
 
 enum class HomeTabs(
     @StringRes val title: Int,
-    @DrawableRes val icon: Int
+    @DrawableRes val icon: Int,
+    val screen : Screen
 ) {
-    TRIP_WATCHER(R.string.trip_watcher, R.drawable.mountains_icon),
-    HOME(R.string.home, R.drawable.home_icon),
-    PROFILE(R.string.profile, R.drawable.person_icon)
+    TRIP_WATCHER(R.string.trip_watcher, R.drawable.mountains_icon, Screen.Launch("")),
+    HOME(R.string.home, R.drawable.home_icon, Screen.Home),
+    PROFILE(R.string.profile, R.drawable.person_icon, Screen.Launch(""))
 }

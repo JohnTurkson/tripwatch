@@ -113,7 +113,6 @@ private fun handleLogIn(appContainer : AppContainer, email : String, password : 
              when(response) {
                  is Success.OK.CreateUserResponse -> {
                      loginSuccess.value = true
-                     appContainer.userData = response.user
                      navigateTo(Screen.Home)
                  }
 

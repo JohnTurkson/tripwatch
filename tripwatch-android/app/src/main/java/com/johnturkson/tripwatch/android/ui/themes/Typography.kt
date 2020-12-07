@@ -11,8 +11,7 @@ val TripwatchTypography = Typography(
         color = Color(0xff3d3d3d),
         fontWeight = FontWeight.Bold,
         fontSize=24.sp),
-    subtitle1 = TextStyle(
-        color = Color(0xffffffff),
-        fontWeight = FontWeight.Bold,
-        fontSize=24.sp)
+    h2= TextStyle(
+            color = Color(0xff3d3d3d),
+            fontSize=20.sp)
 )
