@@ -2,8 +2,10 @@ package com.johnturkson.tripwatch.android.utils
 
 import com.johnturkson.tripwatch.android.ui.FakePlannedUserTrips
 import com.johnturkson.tripwatch.android.ui.FakeTrips
+import com.johnturkson.tripwatch.android.ui.FakeUsers
 import com.johnturkson.tripwatch.android.ui.FakeWatchedUserTrips
 import com.johnturkson.tripwatch.common.data.Trip
+import com.johnturkson.tripwatch.common.data.User
 import com.johnturkson.tripwatch.common.data.UserTrip
 
 /*
@@ -27,5 +29,14 @@ fun getWatchedTripsFromUserId(userId : String) : List<UserTrip> {
 
 fun getUserProfilePictureUrl(userId : String) : String {
     //TODO actual backend stuff
-    return ""
+    return "https://www.pavilionweb.com/wp-content/uploads/2017/03/man-300x300.png"
+}
+
+fun getUserDataFromId(userId : String)  : User {
+    // TODO actual backend stuff
+    FakeUsers.forEach { user ->
+        if(user.id == userId) return user
+    }
+
+    return User("", "")
 }

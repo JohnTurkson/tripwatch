@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import com.johnturkson.tripwatch.android.data.AppContainer
+import com.johnturkson.tripwatch.android.utils.getUserDataFromId
 import com.johnturkson.tripwatch.android.utils.getUserProfilePictureUrl
 import com.johnturkson.tripwatch.android.utils.loadPicture
 import com.johnturkson.tripwatch.common.data.Trip
@@ -38,15 +40,18 @@ fun TripImage(tripData : Trip, onClick : () -> Unit) {
 
 
 @Composable
-fun TripPeople(tripData : UserTrip) {
+fun TripPeople(tripData : UserTrip, appContainer: AppContainer, navigateTo : (Screen) -> Unit) {
     Row {
         for(userId in tripData.userIds) {
-            Box(modifier=Modifier.height(32.dp).width(32.dp)) {
+            Box(modifier=Modifier.height(32.dp).width(32.dp).padding(4.dp)) {
                 val loadPictureState = loadPicture(url = getUserProfilePictureUrl(userId))
                 if (loadPictureState.isLoaded) {
                     Image(
                         bitmap = loadPictureState.data!!.toBitmap().asImageBitmap(),
-                        modifier = Modifier.clip(CircleShape),
+                        modifier = Modifier.clip(CircleShape).clickable(onClick = {
+                            appContainer.profileDisplayUserData = getUserDataFromId(userId)
+                            navigateTo(Screen.Profile)
+                        }),
                         contentScale = ContentScale.FillBounds
                     )
                 }
@@ -56,9 +61,9 @@ fun TripPeople(tripData : UserTrip) {
 }
 
 @Composable
-fun UserTripCard(userTripData : UserTrip, modifier : Modifier, onClick : () -> Unit) {
+fun UserTripCard(userTripData : UserTrip, modifier : Modifier, appContainer: AppContainer, navigateTo : (Screen) -> Unit) {
     Box(modifier = modifier.padding(16.dp)) {
-        TripImage(userTripData.tripData, onClick)
+        TripImage(userTripData.tripData, onClick = {navigateTo(Screen.Home)})
 
         Box(modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
             Text(
@@ -71,7 +76,7 @@ fun UserTripCard(userTripData : UserTrip, modifier : Modifier, onClick : () -> U
         }
 
         Box(modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp)) {
-            TripPeople(userTripData)
+            TripPeople(userTripData, appContainer, navigateTo)
         }
     }
 }

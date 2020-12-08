@@ -9,17 +9,19 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.johnturkson.tripwatch.android.utils.getMutableStateOf
+import com.johnturkson.tripwatch.common.data.User
 
 /**
  * Screen names (used for serialization)
  */
-enum class ScreenName { LAUNCH, HOME }
+enum class ScreenName { LAUNCH, HOME, PROFILE }
 
 /**
  * Class defining the screens we have in the app: home, article details and interests
  */
 sealed class Screen(val id: ScreenName) {
     object Home : Screen(ScreenName.HOME)
+    object Profile : Screen(ScreenName.PROFILE)
     data class Launch(val email : String) : Screen(ScreenName.LAUNCH)
 }
 
@@ -60,6 +62,7 @@ private fun Bundle.toScreen(): Screen {
             Screen.Launch(email)
         }
         ScreenName.HOME -> Screen.Home
+        ScreenName.PROFILE -> Screen.Profile
     }
 }
 

@@ -27,13 +27,13 @@ import com.johnturkson.tripwatch.common.data.UserTrip
 fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewModel) {
 
     // TODO remove, for debug
-    appContainer.userData = User("12345678", "solarcactus@live.com")
+    appContainer.userData = FakeUserData
 
     appContainer.featuredTripDataList = getFeaturedTripsForUser(appContainer.userData.id)
     appContainer.watchedTripDataList = getWatchedTripsFromUserId(appContainer.userData.id)
     appContainer.plannedTripDataList = getPlannedTripsFromUserId(appContainer.userData.id)
 
-    Scaffold(bottomBar = { BottomBar(navigationViewModel::navigateTo) }) { innerPadding ->
+    Scaffold(bottomBar = { BottomBar(appContainer, TripwatchTab.HOME, navigationViewModel::navigateTo) }) { innerPadding ->
         ScrollableColumn(modifier = Modifier.padding(innerPadding).fillMaxWidth()) {
             Column {
 
@@ -56,6 +56,7 @@ fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewM
                 )
 
                 UserTripCardDisplay(trips = appContainer.watchedTripDataList,
+                    appContainer = appContainer,
                     navigateTo = navigationViewModel::navigateTo,
                     modifier = Modifier.preferredWidth(256.dp).preferredHeight(192.dp))
 
@@ -66,6 +67,7 @@ fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewM
                 )
 
                 UserTripCardDisplay(trips = appContainer.plannedTripDataList,
+                    appContainer = appContainer,
                     navigateTo = navigationViewModel::navigateTo,
                     modifier = Modifier.preferredWidth(256.dp).preferredHeight(192.dp))
             }
@@ -81,51 +83,16 @@ fun FeaturedTripCards(trips : List<Trip>, navigateTo : (Screen) -> Unit, modifie
 }
 
 @Composable
-fun UserTripCardDisplay(trips : List<UserTrip>, navigateTo : (Screen) -> Unit, modifier : Modifier) {
+fun UserTripCardDisplay(trips : List<UserTrip>, appContainer: AppContainer, navigateTo : (Screen) -> Unit, modifier : Modifier) {
     ScrollableRow {
         Row {
             trips.forEach { trip ->
                 UserTripCard(
                     userTripData = trip,
                     modifier = modifier,
-                    onClick = {
-                        navigateTo(Screen.Home)
-                })
+                    appContainer = appContainer,
+                    navigateTo = navigateTo)
             }
         }
     }
-}
-
-@Composable
-fun BottomBar(navigateTo : (Screen) -> Unit) {
-    val tabs = HomeTabs.values()
-    val (selectedTab, setSelectedTab) = remember { mutableStateOf(HomeTabs.HOME) }
-
-    BottomNavigation(modifier = Modifier.preferredHeight(64.dp)) {
-        tabs.forEach { tab ->
-            BottomNavigationItem(
-                icon = { Icon(imageResource(tab.icon)) },
-                selected = tab == selectedTab,
-                onClick = {
-                            if(selectedTab.screen != tab.screen) {
-                                setSelectedTab(tab)
-                                navigateTo(tab.screen)
-                            }
-                          },
-
-                label = { Text(text = stringResource(tab.title)) },
-                selectedContentColor = MaterialTheme.colors.secondary,
-                unselectedContentColor = MaterialTheme.colors.onPrimary)
-        }
-    }
-}
-
-enum class HomeTabs(
-    @StringRes val title: Int,
-    @DrawableRes val icon: Int,
-    val screen : Screen
-) {
-    TRIP_WATCHER(R.string.trip_watcher, R.drawable.mountains_icon, Screen.Launch("")),
-    HOME(R.string.home, R.drawable.home_icon, Screen.Home),
-    PROFILE(R.string.profile, R.drawable.person_icon, Screen.Launch(""))
 }
