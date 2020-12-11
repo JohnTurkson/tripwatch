@@ -10,8 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
 import com.johnturkson.tripwatch.android.ui.ProfileImage
 import com.johnturkson.tripwatch.android.utils.getUserProfilePictureUrl
@@ -21,7 +23,11 @@ import com.johnturkson.tripwatch.common.data.User
 @Composable
 fun ProfileScreen(appContainer : AppContainer, navigationViewModel : NavigationViewModel) {
     Scaffold(bottomBar = { BottomBar(appContainer, TripwatchTab.PROFILE, navigationViewModel::navigateTo) }) { innerPadding ->
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier = Modifier.padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
+
+            Image(bitmap = imageResource(R.drawable.trip_watch),
+                modifier = Modifier.align(Alignment.Start).padding(horizontal = 16.dp).preferredWidth(128.dp).preferredHeight(48.dp))
+
             Spacer(modifier = Modifier.preferredHeight(32.dp))
             ProfileImage(appContainer.profileDisplayUserData)
             Text(text = appContainer.profileDisplayUserData.email)

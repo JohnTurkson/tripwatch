@@ -2,6 +2,7 @@ package com.johnturkson.tripwatch.android.ui
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.layout.*
@@ -36,18 +37,20 @@ fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewM
     Scaffold(bottomBar = { BottomBar(appContainer, TripwatchTab.HOME, navigationViewModel::navigateTo) }) { innerPadding ->
         ScrollableColumn(modifier = Modifier.padding(innerPadding).fillMaxWidth()) {
             Column {
+                Image(bitmap = imageResource(R.drawable.trip_watch),
+                    modifier = Modifier.align(Alignment.Start).padding(horizontal = 16.dp).preferredWidth(128.dp).preferredHeight(48.dp))
 
                 Spacer(modifier = Modifier.preferredHeight(16.dp))
                 Text(
                     text = "Trips to check out",
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.h2
+                    style = MaterialTheme.typography.h1
                 )
 
                 FeaturedTripCards(trips = appContainer.featuredTripDataList,
                     navigateTo = navigationViewModel::navigateTo,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
-                        .preferredWidth(384.dp).preferredHeight(320.dp))
+                        .preferredWidth(384.dp).preferredHeight(288.dp))
 
                 Text(
                     text = "Trips you're watching",

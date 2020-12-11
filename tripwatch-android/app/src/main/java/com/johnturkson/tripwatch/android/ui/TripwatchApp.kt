@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
@@ -37,7 +39,7 @@ fun BottomBar(appContainer : AppContainer, selectedTab : TripwatchTab, navigateT
     BottomNavigation(modifier = Modifier.preferredHeight(64.dp)) {
         tabs.forEach { tab ->
             BottomNavigationItem(
-                icon = { Icon(imageResource(tab.icon)) },
+                icon = { Icon(vectorResource(tab.icon)) },
                 selected = tab == selectedTab,
                 onClick = {
                     if(selectedTab.screen != tab.screen) {
@@ -50,7 +52,7 @@ fun BottomBar(appContainer : AppContainer, selectedTab : TripwatchTab, navigateT
 
                 label = { Text(text = stringResource(tab.title)) },
                 selectedContentColor = MaterialTheme.colors.secondary,
-                unselectedContentColor = MaterialTheme.colors.onPrimary)
+                unselectedContentColor = Color.White)
         }
     }
 }
@@ -60,7 +62,7 @@ enum class TripwatchTab(
     @DrawableRes val icon: Int,
     val screen : Screen
 ) {
-    TRIP_WATCHER(R.string.trip_watcher, R.drawable.mountains_icon, Screen.Launch("")),
-    HOME(R.string.home, R.drawable.home_icon, Screen.Home),
-    PROFILE(R.string.profile, R.drawable.person_icon, Screen.Profile)
+    HOME(R.string.home, R.drawable.ic_baseline_home_24, Screen.Home),
+    TRIP_WATCHER(R.string.trip_watcher, R.drawable.ic_mountain, Screen.Launch("")),
+    PROFILE(R.string.profile, R.drawable.ic_baseline_person_24, Screen.Profile)
 }

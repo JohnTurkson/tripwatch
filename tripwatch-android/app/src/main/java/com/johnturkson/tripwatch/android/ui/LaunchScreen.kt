@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
@@ -86,7 +87,8 @@ private fun PasswordTextBox(value : TextFieldValue, onValueChange : (TextFieldVa
 private fun LoginButton(appContainer : AppContainer, navigateTo : (Screen) -> Unit) {
     Button(
         colors = ButtonConstants.defaultButtonColors(
-            backgroundColor = MaterialTheme.colors.primary
+            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = Color.White
         ),
         onClick = {
             handleLogIn(
