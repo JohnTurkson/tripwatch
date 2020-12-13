@@ -17,9 +17,11 @@ import androidx.compose.ui.unit.dp
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
 import com.johnturkson.tripwatch.android.ui.themes.TripwatchTheme
+import com.johnturkson.tripwatch.android.utils.pictureCache
 
 @Composable
 fun TripwatchApp(appContainer : AppContainer, navigationViewModel : NavigationViewModel) {
+    pictureCache.clear()
     TripwatchTheme {
         Crossfade(navigationViewModel.currentScreen) { screen ->
             when (screen) {

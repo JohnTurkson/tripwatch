@@ -2,6 +2,7 @@ package com.johnturkson.tripwatch.android.utils
 
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -19,16 +20,44 @@ import com.johnturkson.tripwatch.android.ui.state.UiState
 import com.johnturkson.tripwatch.android.ui.state.copyWithResult
 
 
+class PictureCache(cacheSize : Int = 8) {
+
+    val pictureCache = mutableMapOf<String, Drawable>()
+    val cacheSize = cacheSize
+
+    fun containsKey(url : String) : Boolean {
+        return pictureCache.containsKey(url)
+    }
+
+    fun clear() {
+        pictureCache.clear()
+    }
+
+    operator fun get(url : String) : Drawable? {
+        return pictureCache[url]
+    }
+
+    operator fun set(url : String, drawable: Drawable) {
+        if (pictureCache.size > cacheSize) {
+            pictureCache[url] = drawable
+        }
+        else {
+            pictureCache.clear()
+            pictureCache[url] = drawable
+        }
+    }
+}
+
+val pictureCache = PictureCache()
+
 @OptIn(ExperimentalAnimationApi::class)
 enum class AnimationType(
     val transition : EnterTransition) {
 
-    FADE_IN(fadeIn()),
-    SLIDE_HORIZONTALLY(slideInHorizontally(initialOffsetX = { 100 })
-        + expandHorizontally(expandFrom = androidx.compose.ui.Alignment.End) + fadeIn(initialAlpha = 0.3f))
+    FADE_IN(fadeIn(animSpec = tween(durationMillis = 750))),
+    SLIDE_HORIZONTALLY(slideInHorizontally(initialOffsetX = { 100 }, animSpec = tween(durationMillis = 500))
+        + expandHorizontally(expandFrom = androidx.compose.ui.Alignment.End) + fadeIn(initialAlpha = 0.2f, animSpec = tween(durationMillis = 750)))
 }
-
-val pictureCache = mutableMapOf<String, Drawable>()
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -57,7 +86,6 @@ fun URLImage(url: String, enterTransition : AnimationType = AnimationType.FADE_I
         visible = bitmapState.value.isLoaded,
         enter = enterTransition.transition) {
         if (bitmapState.value.isLoaded) {
-            println(pictureCache)
             Image(
                 bitmap = bitmapState.value.data!!.toBitmap().asImageBitmap(),
                 modifier = modifier,
@@ -65,6 +93,5 @@ fun URLImage(url: String, enterTransition : AnimationType = AnimationType.FADE_I
             )
         }
     }
-
 }
 

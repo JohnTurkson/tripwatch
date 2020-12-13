@@ -21,13 +21,13 @@ import com.johnturkson.tripwatch.android.data.AppContainer
 import com.johnturkson.tripwatch.android.utils.getFeaturedTripsForUser
 import com.johnturkson.tripwatch.android.utils.getPlannedTripsFromUserId
 import com.johnturkson.tripwatch.android.utils.getWatchedTripsFromUserId
+import com.johnturkson.tripwatch.android.utils.pictureCache
 import com.johnturkson.tripwatch.common.data.Trip
 import com.johnturkson.tripwatch.common.data.User
 import com.johnturkson.tripwatch.common.data.UserTrip
 
 @Composable
 fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewModel) {
-
     // TODO remove, for debug
     appContainer.userData = FakeUserData
 

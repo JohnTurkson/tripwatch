@@ -9,6 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.johnturkson.tripwatch.android.utils.getMutableStateOf
+import com.johnturkson.tripwatch.android.utils.pictureCache
 import com.johnturkson.tripwatch.common.data.User
 
 /**

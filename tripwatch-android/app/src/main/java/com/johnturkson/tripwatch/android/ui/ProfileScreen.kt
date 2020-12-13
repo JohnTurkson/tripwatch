@@ -20,10 +20,12 @@ import com.johnturkson.tripwatch.android.data.AppContainer
 import com.johnturkson.tripwatch.android.ui.ProfileImage
 import com.johnturkson.tripwatch.android.utils.URLImage
 import com.johnturkson.tripwatch.android.utils.getUserProfilePictureUrl
+import com.johnturkson.tripwatch.android.utils.pictureCache
 import com.johnturkson.tripwatch.common.data.User
 
 @Composable
 fun ProfileScreen(appContainer : AppContainer, navigationViewModel : NavigationViewModel) {
+
     Scaffold(bottomBar = { BottomBar(appContainer, TripwatchTab.PROFILE, navigationViewModel::navigateTo) }) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
 
