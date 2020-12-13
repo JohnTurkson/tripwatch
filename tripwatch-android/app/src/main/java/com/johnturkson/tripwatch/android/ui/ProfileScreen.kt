@@ -1,5 +1,7 @@
 package com.johnturkson.tripwatch.android.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -16,8 +18,8 @@ import androidx.core.graphics.drawable.toBitmap
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
 import com.johnturkson.tripwatch.android.ui.ProfileImage
+import com.johnturkson.tripwatch.android.utils.URLImage
 import com.johnturkson.tripwatch.android.utils.getUserProfilePictureUrl
-import com.johnturkson.tripwatch.android.utils.loadPicture
 import com.johnturkson.tripwatch.common.data.User
 
 @Composable
@@ -29,21 +31,22 @@ fun ProfileScreen(appContainer : AppContainer, navigationViewModel : NavigationV
                 modifier = Modifier.align(Alignment.Start).padding(horizontal = 16.dp).preferredWidth(128.dp).preferredHeight(48.dp))
 
             Spacer(modifier = Modifier.preferredHeight(32.dp))
-            ProfileImage(appContainer.profileDisplayUserData)
+
+            ProfileImage(userData = appContainer.profileDisplayUserData,
+                modifier = Modifier.preferredWidth(128.dp)
+                    .preferredHeight(128.dp))
+
             Text(text = appContainer.profileDisplayUserData.email)
         }
     }
 }
 
 @Composable
-fun ProfileImage(userData : User) {
-    Box(modifier = Modifier.fillMaxWidth()) {
-        val loadPictureState = loadPicture(getUserProfilePictureUrl(userData.id))
-        if(loadPictureState.isLoaded) {
-            Image(
-                bitmap = loadPictureState.data!!.toBitmap().asImageBitmap(),
-                modifier = Modifier.align(Alignment.Center)
-                    .preferredWidth(128.dp).preferredHeight(128.dp).clip(CircleShape))
-        }
+fun ProfileImage(userData : User, modifier : Modifier) {
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        URLImage(
+            url = getUserProfilePictureUrl(userData.id),
+            modifier = modifier.clip(CircleShape)
+        )
     }
 }

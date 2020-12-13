@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -87,15 +88,11 @@ fun FeaturedTripCards(trips : List<Trip>, navigateTo : (Screen) -> Unit, modifie
 
 @Composable
 fun UserTripCardDisplay(trips : List<UserTrip>, appContainer: AppContainer, navigateTo : (Screen) -> Unit, modifier : Modifier) {
-    ScrollableRow {
-        Row {
-            trips.forEach { trip ->
-                UserTripCard(
-                    userTripData = trip,
-                    modifier = modifier,
-                    appContainer = appContainer,
-                    navigateTo = navigateTo)
-            }
-        }
-    }
+    LazyRowFor(items = trips, itemContent = { trip ->
+            UserTripCard(
+                userTripData = trip,
+                modifier = modifier,
+                appContainer = appContainer,
+                navigateTo = navigateTo)
+        })
 }

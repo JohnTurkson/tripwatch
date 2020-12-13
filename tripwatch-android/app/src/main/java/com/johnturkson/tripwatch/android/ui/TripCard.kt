@@ -1,5 +1,6 @@
 package com.johnturkson.tripwatch.android.ui
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,23 +22,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.johnturkson.tripwatch.android.data.AppContainer
+import com.johnturkson.tripwatch.android.utils.AnimationType
+import com.johnturkson.tripwatch.android.utils.URLImage
 import com.johnturkson.tripwatch.android.utils.getUserDataFromId
 import com.johnturkson.tripwatch.android.utils.getUserProfilePictureUrl
-import com.johnturkson.tripwatch.android.utils.loadPicture
 import com.johnturkson.tripwatch.common.data.Trip
 import com.johnturkson.tripwatch.common.data.UserTrip
 
 @Composable
 fun TripImage(tripData : Trip, onClick : () -> Unit) {
-    val loadPictureState = loadPicture(url = tripData.imageUrl)
-
-    if(loadPictureState.isLoaded) {
-        Image(
-            bitmap = loadPictureState.data!!.toBitmap().asImageBitmap(),
-            modifier = Modifier.clip(MaterialTheme.shapes.large).clickable(onClick = onClick),
-            contentScale = ContentScale.FillBounds
-        )
-    }
+    URLImage(url = tripData.imageUrl,
+            enterTransition = AnimationType.SLIDE_HORIZONTALLY,
+            modifier = Modifier.clip(MaterialTheme.shapes.large).clickable(onClick = onClick))
 }
 
 
@@ -44,17 +42,14 @@ fun TripPeople(tripData : UserTrip, appContainer: AppContainer, navigateTo : (Sc
     Row {
         for(userId in tripData.userIds) {
             Box(modifier=Modifier.height(32.dp).width(32.dp).padding(4.dp)) {
-                val loadPictureState = loadPicture(url = getUserProfilePictureUrl(userId))
-                if (loadPictureState.isLoaded) {
-                    Image(
-                        bitmap = loadPictureState.data!!.toBitmap().asImageBitmap(),
-                        modifier = Modifier.clip(CircleShape).clickable(onClick = {
-                            appContainer.profileDisplayUserData = getUserDataFromId(userId)
-                            navigateTo(Screen.Profile)
-                        }),
-                        contentScale = ContentScale.FillBounds
-                    )
-                }
+                URLImage(
+                    url = getUserProfilePictureUrl(userId),
+                    enterTransition = AnimationType.SLIDE_HORIZONTALLY,
+                    modifier = Modifier.clip(CircleShape).clickable(onClick = {
+                        appContainer.profileDisplayUserData = getUserDataFromId(userId)
+                        navigateTo(Screen.Profile)
+                    })
+                )
             }
         }
     }
