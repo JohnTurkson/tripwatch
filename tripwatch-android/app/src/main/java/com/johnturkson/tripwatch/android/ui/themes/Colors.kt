@@ -2,9 +2,7 @@ package com.johnturkson.tripwatch.android.ui.themes
 
 import androidx.compose.ui.graphics.Color
 
-val TeaGreen = Color(0xD0EFB1)
-val BeauBlue = Color(0xCAE5FF)
-val HonululuBlue = Color(0x386FA4)
-val FernGreen = Color(0x5B7553)
-val CulturedWhite = Color(0xF5F5F5)
+val SeaGreen = Color(0xff006633)
+val Purple = Color(0xff5E239D)
+val HoneyYellow = Color(0xffF6AE2D)
 val Red800 = Color(0xffd00036)

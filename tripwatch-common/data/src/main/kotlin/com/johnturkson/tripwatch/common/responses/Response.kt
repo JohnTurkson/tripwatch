@@ -127,4 +127,15 @@ sealed class Response {
             override val statusCode: Int = 500
         }
     }
+    
+    @Serializable
+    @SerialName("ServerError")
+    sealed class ServerError : Response() {
+        @Serializable
+        @SerialName("InternalServerError")
+        object InternalServerError : ServerError() {
+            @Transient
+            override val statusCode: Int = 500
+        }
+    }
 }

@@ -8,21 +8,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val LightThemeColors = lightColors(
-        primary = TeaGreen,
-        primaryVariant = FernGreen,
-        onPrimary = CulturedWhite,
-        secondary = BeauBlue,
-        secondaryVariant = HonululuBlue,
-        onSecondary = CulturedWhite,
+        primary = SeaGreen,
+        primaryVariant = Color.White,
+        onPrimary = Color.Black,
+        secondary = HoneyYellow,
+        secondaryVariant = Purple,
+        onSecondary = Color.White,
         error = Red800
 )
 
 private val DarkThemeColors = darkColors(
-        primary = TeaGreen,
-        primaryVariant = FernGreen,
-        onPrimary = Color.Black,
-        secondary = BeauBlue,
-        onSecondary = CulturedWhite,
+        primary = Color.Black,
+        primaryVariant = SeaGreen,
+        onPrimary = HoneyYellow,
+        secondary = Purple,
+        onSecondary = Color.Black,
         error = Red800
 )
 
@@ -30,5 +30,7 @@ private val DarkThemeColors = darkColors(
 fun TripwatchTheme(darkTheme : Boolean = isSystemInDarkTheme(), content : @Composable () -> Unit) {
     MaterialTheme(
             colors = if(darkTheme) DarkThemeColors else LightThemeColors,
+            shapes = TripwatchShapes,
+            typography = TripwatchTypography,
             content = content)
 }
