@@ -56,7 +56,9 @@ enum class AnimationType(
 
     FADE_IN(fadeIn(animSpec = tween(durationMillis = 750))),
     SLIDE_HORIZONTALLY(slideInHorizontally(initialOffsetX = { 100 }, animSpec = tween(durationMillis = 500))
-        + expandHorizontally(expandFrom = androidx.compose.ui.Alignment.End) + fadeIn(initialAlpha = 0.2f, animSpec = tween(durationMillis = 750)))
+        + expandHorizontally(expandFrom = androidx.compose.ui.Alignment.End) + fadeIn(initialAlpha = 0.2f, animSpec = tween(durationMillis = 750))),
+    SLIDE_VERTICALLY(slideInVertically(initialOffsetY = { 100 }, animSpec = tween(durationMillis = 500))
+            + expandVertically(expandFrom = androidx.compose.ui.Alignment.Top) + fadeIn(initialAlpha = 0.2f, animSpec = tween(durationMillis = 750)))
 }
 
 @OptIn(ExperimentalAnimationApi::class)

@@ -18,6 +18,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
 import com.johnturkson.tripwatch.android.ui.ProfileImage
+import com.johnturkson.tripwatch.android.utils.AnimationType
 import com.johnturkson.tripwatch.android.utils.URLImage
 import com.johnturkson.tripwatch.android.utils.getUserProfilePictureUrl
 import com.johnturkson.tripwatch.android.utils.pictureCache
@@ -46,9 +47,12 @@ fun ProfileScreen(appContainer : AppContainer, navigationViewModel : NavigationV
 @Composable
 fun ProfileImage(userData : User, modifier : Modifier) {
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        URLImage(
-            url = getUserProfilePictureUrl(userData.id),
-            modifier = modifier.clip(CircleShape)
-        )
+        getUserProfilePictureUrl(FakeUserData2.id)?.let {
+            URLImage(
+                url = it,
+                enterTransition = AnimationType.SLIDE_VERTICALLY,
+                modifier = modifier.clip(CircleShape)
+            )
+        }
     }
 }

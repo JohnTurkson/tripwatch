@@ -42,14 +42,16 @@ fun TripPeople(tripData : UserTrip, appContainer: AppContainer, navigateTo : (Sc
     Row {
         for(userId in tripData.userIds) {
             Box(modifier=Modifier.height(32.dp).width(32.dp).padding(4.dp)) {
-                URLImage(
-                    url = getUserProfilePictureUrl(userId),
-                    enterTransition = AnimationType.SLIDE_HORIZONTALLY,
-                    modifier = Modifier.clip(CircleShape).clickable(onClick = {
-                        appContainer.profileDisplayUserData = getUserDataFromId(userId)
-                        navigateTo(Screen.Profile)
-                    })
-                )
+                getUserProfilePictureUrl(userId)?.let {
+                    URLImage(
+                        url = it,
+                        enterTransition = AnimationType.SLIDE_HORIZONTALLY,
+                        modifier = Modifier.clip(CircleShape).clickable(onClick = {
+                            appContainer.profileDisplayUserData = getUserDataFromId(userId)
+                            navigateTo(Screen.Profile)
+                        })
+                    )
+                }
             }
         }
     }
