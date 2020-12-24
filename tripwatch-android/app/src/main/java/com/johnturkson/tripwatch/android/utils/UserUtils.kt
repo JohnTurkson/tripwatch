@@ -5,13 +5,15 @@ import com.johnturkson.tripwatch.common.data.Trip
 import com.johnturkson.tripwatch.common.data.User
 import com.johnturkson.tripwatch.common.data.UserTrip
 
+const val CURRENT_USER_ID_KEY = "CURRENT_USER"
+
 /*
 * File for anything communicating with the backend endpoint
 * that retrieves user data (friends, trips, profile picture, etc...)
 *
 */
 fun getFeaturedTripsForUser(userId : String) : List<Trip> {
-    return FakeTrips
+    return FakeTrips.map { pair -> pair.value }
 }
 
 fun getPlannedTripsFromUserId(userId : String) : List<UserTrip> {
@@ -30,6 +32,7 @@ fun getUserProfilePictureUrl(userId : String) : String? {
 }
 
 fun getUserDataFromId(userId : String)  : User {
+
     // TODO actual backend stuff
     FakeUsers.forEach { user ->
         if(user.id == userId) return user

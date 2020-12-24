@@ -4,14 +4,20 @@ import android.graphics.drawable.Drawable
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.onDispose
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.VerticalGradient
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.AmbientContext
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import coil.Coil
 import coil.request.ImageRequest
@@ -97,3 +103,17 @@ fun URLImage(url: String, enterTransition : AnimationType = AnimationType.FADE_I
     }
 }
 
+@Composable
+fun ImageGradient(modifier : Modifier, fadeThreshold : Float, content : @Composable () -> Unit) {
+    content()
+    Column(
+        modifier
+            .background(
+                VerticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black),
+                    startY = 0f,
+                    endY = fadeThreshold
+                )
+            )
+    ) {}
+}

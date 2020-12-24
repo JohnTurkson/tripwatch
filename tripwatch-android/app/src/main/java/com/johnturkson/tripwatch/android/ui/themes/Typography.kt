@@ -13,5 +13,9 @@ val TripwatchTypography = Typography(
         fontSize=24.sp),
     h2= TextStyle(
             color = Color(0xff3d3d3d),
-            fontSize=20.sp)
+            fontSize=20.sp),
+    subtitle2 = TextStyle(
+            color = Color(0xff555555),
+            fontSize=12.sp
+    )
 )

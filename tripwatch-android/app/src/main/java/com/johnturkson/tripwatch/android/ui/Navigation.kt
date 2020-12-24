@@ -15,14 +15,16 @@ import com.johnturkson.tripwatch.common.data.User
 /**
  * Screen names (used for serialization)
  */
-enum class ScreenName { LAUNCH, HOME, PROFILE }
+enum class ScreenName { LAUNCH, HOME, PROFILE, EXPLORE, TRIP_INFO }
 
 /**
  * Class defining the screens we have in the app: home, article details and interests
  */
 sealed class Screen(val id: ScreenName) {
     object Home : Screen(ScreenName.HOME)
-    object Profile : Screen(ScreenName.PROFILE)
+    object Explore : Screen(ScreenName.EXPLORE)
+    data class Profile(val userId : String) : Screen(ScreenName.PROFILE)
+    data class TripInfo(val tripId : String) : Screen(ScreenName.TRIP_INFO)
     data class Launch(val email : String) : Screen(ScreenName.LAUNCH)
 }
 
@@ -35,6 +37,8 @@ sealed class Screen(val id: ScreenName) {
 private const val SIS_SCREEN = "sis_screen"
 private const val SIS_NAME = "screen_name"
 private const val SIS_EMAIL = "screen_email"
+private const val SIS_TRIP_ID = "trip_id"
+private const val SIS_USER_ID = "user_id"
 
 private fun Bundle.getStringOrThrow(key: String) =
     requireNotNull(getString(key)) { "Missing key '$key' in $this" }
@@ -47,6 +51,14 @@ private fun Screen.toBundle(): Bundle {
         // add extra keys for various types here
         if (this is Screen.Launch) {
             it.putString(SIS_EMAIL, email)
+        }
+
+        if(this is Screen.TripInfo) {
+            it.putString(SIS_TRIP_ID, tripId)
+        }
+
+        if(this is Screen.Profile) {
+            it.putString(SIS_TRIP_ID, userId)
         }
     }
 }
@@ -62,8 +74,17 @@ private fun Bundle.toScreen(): Screen {
             val email = getStringOrThrow(SIS_EMAIL)
             Screen.Launch(email)
         }
+        ScreenName.TRIP_INFO -> {
+            val tripId = getStringOrThrow(SIS_TRIP_ID)
+            Screen.TripInfo(tripId)
+        }
+
+        ScreenName.PROFILE -> {
+            val userId = getStringOrThrow(SIS_USER_ID)
+            Screen.Profile(userId)
+        }
         ScreenName.HOME -> Screen.Home
-        ScreenName.PROFILE -> Screen.Profile
+        ScreenName.EXPLORE -> Screen.Explore
     }
 }
 

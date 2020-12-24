@@ -22,18 +22,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.johnturkson.tripwatch.android.data.AppContainer
-import com.johnturkson.tripwatch.android.utils.AnimationType
-import com.johnturkson.tripwatch.android.utils.URLImage
-import com.johnturkson.tripwatch.android.utils.getUserDataFromId
-import com.johnturkson.tripwatch.android.utils.getUserProfilePictureUrl
+import com.johnturkson.tripwatch.android.utils.*
 import com.johnturkson.tripwatch.common.data.Trip
 import com.johnturkson.tripwatch.common.data.UserTrip
 
 @Composable
 fun TripImage(tripData : Trip, onClick : () -> Unit) {
-    URLImage(url = tripData.imageUrl,
-            enterTransition = AnimationType.SLIDE_HORIZONTALLY,
-            modifier = Modifier.clip(MaterialTheme.shapes.large).clickable(onClick = onClick))
+    URLImage(
+        url = tripData.imageUrl,
+        enterTransition = AnimationType.SLIDE_HORIZONTALLY,
+        modifier = Modifier.clip(MaterialTheme.shapes.large).clickable(onClick = onClick)
+    )
 }
 
 
@@ -47,8 +46,7 @@ fun TripPeople(tripData : UserTrip, appContainer: AppContainer, navigateTo : (Sc
                         url = it,
                         enterTransition = AnimationType.SLIDE_HORIZONTALLY,
                         modifier = Modifier.clip(CircleShape).clickable(onClick = {
-                            appContainer.profileDisplayUserData = getUserDataFromId(userId)
-                            navigateTo(Screen.Profile)
+                            navigateTo(Screen.Profile(userId))
                         })
                     )
                 }
@@ -59,8 +57,9 @@ fun TripPeople(tripData : UserTrip, appContainer: AppContainer, navigateTo : (Sc
 
 @Composable
 fun UserTripCard(userTripData : UserTrip, modifier : Modifier, appContainer: AppContainer, navigateTo : (Screen) -> Unit) {
+
     Box(modifier = modifier.padding(16.dp)) {
-        TripImage(userTripData.tripData, onClick = {navigateTo(Screen.Home)})
+        TripImage(userTripData.tripData, onClick = { navigateTo(Screen.TripInfo(userTripData.tripData.tripId))})
 
         Box(modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
             Text(
@@ -79,9 +78,12 @@ fun UserTripCard(userTripData : UserTrip, modifier : Modifier, appContainer: App
 }
 
 @Composable
-fun TripCard(tripData : Trip, modifier : Modifier, onClick : () -> Unit) {
+fun TripCard(tripData : Trip, modifier : Modifier, navigateTo : (Screen) -> Unit) {
+
     Box(modifier = modifier.padding(16.dp)) {
-        TripImage(tripData, onClick)
+        TripImage(tripData, onClick = {
+            navigateTo(Screen.TripInfo(tripData.tripId))
+        })
 
         Box(modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
             Text(

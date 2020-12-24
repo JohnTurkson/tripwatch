@@ -9,7 +9,7 @@ buildscript {
     }
     
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.0-alpha02")
+        classpath("com.android.tools.build:gradle:7.0.0-alpha03")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.20")
         classpath("org.jetbrains.kotlin:kotlin-serialization:1.4.20")
         classpath("org.jetbrains.compose:compose-gradle-plugin:0.2.0-build132")

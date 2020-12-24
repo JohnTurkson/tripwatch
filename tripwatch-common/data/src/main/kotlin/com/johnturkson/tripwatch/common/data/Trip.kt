@@ -9,4 +9,4 @@ import kotlinx.serialization.Serializable
  */
 
 @Serializable
-data class Trip(val tripName : String, val imageUrl : String)
+data class Trip(val tripId : String, val tripName : String, val imageUrl : String)

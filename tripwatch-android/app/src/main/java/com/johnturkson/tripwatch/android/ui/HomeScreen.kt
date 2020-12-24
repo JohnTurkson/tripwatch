@@ -1,33 +1,35 @@
 package com.johnturkson.tripwatch.android.ui
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
+import android.graphics.drawable.Drawable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.ScrollableRow
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import com.johnturkson.tripwatch.R
 import com.johnturkson.tripwatch.android.data.AppContainer
-import com.johnturkson.tripwatch.android.utils.getFeaturedTripsForUser
-import com.johnturkson.tripwatch.android.utils.getPlannedTripsFromUserId
-import com.johnturkson.tripwatch.android.utils.getWatchedTripsFromUserId
-import com.johnturkson.tripwatch.android.utils.pictureCache
+import com.johnturkson.tripwatch.android.utils.*
 import com.johnturkson.tripwatch.common.data.Trip
-import com.johnturkson.tripwatch.common.data.User
 import com.johnturkson.tripwatch.common.data.UserTrip
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
+class HomeViewModel : ViewModel() {}
 
 @Composable
-fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewModel) {
+fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewModel, homeViewModel: HomeViewModel) {
     // TODO remove, for debug
     appContainer.userData = FakeUserData
 
@@ -38,14 +40,15 @@ fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewM
     Scaffold(bottomBar = { BottomBar(appContainer, TripwatchTab.HOME, navigationViewModel::navigateTo) }) { innerPadding ->
         ScrollableColumn(modifier = Modifier.padding(innerPadding).fillMaxWidth()) {
             Column {
-                Image(bitmap = imageResource(R.drawable.trip_watch),
-                    modifier = Modifier.align(Alignment.Start).padding(horizontal = 16.dp).preferredWidth(128.dp).preferredHeight(48.dp))
 
-                Spacer(modifier = Modifier.preferredHeight(16.dp))
-                Text(
+                TripwatchLogoHeader()
+
+                AnimatedText(
                     text = "Trips to check out",
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.h1
+                    enterTransition = AnimationType.SLIDE_VERTICALLY,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.h1,
+                    visible = true
                 )
 
                 FeaturedTripCards(trips = appContainer.featuredTripDataList,
@@ -53,10 +56,12 @@ fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewM
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                         .preferredWidth(384.dp).preferredHeight(288.dp))
 
-                Text(
+                AnimatedText(
                     text = "Trips you're watching",
+                    enterTransition = AnimationType.SLIDE_VERTICALLY,
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    style = MaterialTheme.typography.h2
+                    style = MaterialTheme.typography.h2,
+                    visible = true
                 )
 
                 UserTripCardDisplay(trips = appContainer.watchedTripDataList,
@@ -64,10 +69,12 @@ fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewM
                     navigateTo = navigationViewModel::navigateTo,
                     modifier = Modifier.preferredWidth(256.dp).preferredHeight(192.dp))
 
-                Text(
+                AnimatedText(
                     text = "Trips you've planned",
+                    enterTransition = AnimationType.SLIDE_VERTICALLY,
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    style = MaterialTheme.typography.h2
+                    style = MaterialTheme.typography.h2,
+                    visible = true
                 )
 
                 UserTripCardDisplay(trips = appContainer.plannedTripDataList,
@@ -79,11 +86,20 @@ fun HomeScreen(appContainer : AppContainer, navigationViewModel: NavigationViewM
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun AnimatedText(text : String, enterTransition : AnimationType, modifier : Modifier, style : TextStyle, visible : Boolean) {
+    AnimatedVisibility(visible = visible, enter = enterTransition.transition) {
+        Text(text = text, modifier = modifier, style = style)
+    }
+}
+
 @Composable
 fun FeaturedTripCards(trips : List<Trip>, navigateTo : (Screen) -> Unit, modifier : Modifier) {
-    TripCard(trips[0], modifier = modifier.fillMaxWidth(), onClick = {
-        navigateTo(Screen.Home)
-    })
+    TripCard(trips[0],
+        modifier = modifier.fillMaxWidth(),
+        navigateTo = navigateTo
+    )
 }
 
 @Composable
