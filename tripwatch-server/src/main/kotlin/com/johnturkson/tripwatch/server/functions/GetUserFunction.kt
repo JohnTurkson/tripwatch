@@ -1,7 +1,7 @@
 package com.johnturkson.tripwatch.server.functions
 
-import com.johnturkson.awstools.dynamodb.objectbuilder.buildDynamoDBObject
-import com.johnturkson.awstools.dynamodb.requestbuilder.requests.GetItemRequest
+import com.johnturkson.awstools.dynamodb.client.DynamoDBClient
+import com.johnturkson.awstools.dynamodb.requests.GetItemRequest
 import com.johnturkson.tripwatch.common.data.User
 import com.johnturkson.tripwatch.common.requests.Request
 import com.johnturkson.tripwatch.common.requests.Request.GetUserRequest
@@ -9,8 +9,9 @@ import com.johnturkson.tripwatch.common.responses.Response
 import com.johnturkson.tripwatch.common.responses.Response.ClientError.BadRequest.InvalidRequestError
 import com.johnturkson.tripwatch.common.responses.Response.ClientError.NotFound.UserNotFoundError
 import com.johnturkson.tripwatch.common.responses.Response.Success.OK.GetUserResponse
-import com.johnturkson.tripwatch.server.configuration.DatabaseRequestHandler
 import com.johnturkson.tripwatch.server.configuration.SerializerConfiguration
+import com.johnturkson.tripwatch.server.database.data.UserData
+import com.johnturkson.tripwatch.server.database.keys.UserKey
 import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
@@ -52,21 +53,21 @@ class GetUserFunction : HttpLambdaFunction<Request, Response> {
     suspend fun getUser(user: String): Response {
         // TODO authorization
         
-        val handler = DatabaseRequestHandler.instance
+        val handler = DynamoDBClient()
         
         val getUserRequest = GetItemRequest(
             "TripWatchUsers",
-            buildDynamoDBObject {
-                put("id", user)
-            },
+            UserKey(user),
         )
         
         val getUserResponse = runCatching {
-            handler.getItem(getUserRequest, User.serializer())
+            handler.getItem<UserKey, UserData>(getUserRequest)
         }.getOrElse {
             return UserNotFoundError(user)
         }
         
-        return GetUserResponse(getUserResponse.item)
+        val (id, email) = getUserResponse.item
+        
+        return GetUserResponse(User(id.value, email.value))
     }
 }

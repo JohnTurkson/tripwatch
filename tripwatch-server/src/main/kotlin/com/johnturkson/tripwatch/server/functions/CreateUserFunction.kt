@@ -1,6 +1,7 @@
 package com.johnturkson.tripwatch.server.functions
 
-import com.johnturkson.awstools.dynamodb.requestbuilder.requests.PutItemRequest
+import com.johnturkson.awstools.dynamodb.client.DynamoDBClient
+import com.johnturkson.awstools.dynamodb.requests.PutItemRequest
 import com.johnturkson.tripwatch.common.data.User
 import com.johnturkson.tripwatch.common.requests.Request
 import com.johnturkson.tripwatch.common.requests.Request.CreateUserRequest
@@ -9,16 +10,14 @@ import com.johnturkson.tripwatch.common.responses.Response.ClientError.BadReques
 import com.johnturkson.tripwatch.common.responses.Response.ServerError.InternalServerError
 import com.johnturkson.tripwatch.common.responses.Response.Success.OK.CreateUserResponse
 import com.johnturkson.tripwatch.server.configuration.ClientConfiguration
-import com.johnturkson.tripwatch.server.configuration.DatabaseRequestHandler
 import com.johnturkson.tripwatch.server.configuration.SerializerConfiguration
-import com.johnturkson.tripwatch.server.data.UserData
+import com.johnturkson.tripwatch.server.database.data.UserData
+import com.johnturkson.tripwatch.server.database.data.UserEmailData
 import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.security.MessageDigest
 import kotlin.random.Random
@@ -63,16 +62,17 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         if (password.isTooLong()) return PasswordTooLongError
         if (password.isBreached()) return BreachedPasswordError
         
-        val handler = DatabaseRequestHandler.instance
+        // TODO singleton handler
+        val database = DynamoDBClient()
         
         val putEmailRequest = PutItemRequest(
             "TripWatchUserEmails",
-            mapOf("email" to email),
+            UserEmailData(email),
             conditionExpression = "attribute_not_exists(email)",
         )
         
         runCatching {
-            handler.putItem(putEmailRequest, MapSerializer(String.serializer(), String.serializer()))
+            database.putItem(putEmailRequest)
         }.onFailure {
             return EmailAlreadyTakenError
         }
@@ -83,7 +83,7 @@ class CreateUserFunction : HttpLambdaFunction<Request, Response> {
         val putUserRequest = PutItemRequest("TripWatchUsers", data)
         
         runCatching {
-            handler.putItem(putUserRequest, UserData.serializer())
+            database.putItem(putUserRequest)
         }.onFailure {
             return InternalServerError
         }

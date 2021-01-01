@@ -1,7 +1,8 @@
 package com.johnturkson.tripwatch.server.functions
 
-import com.johnturkson.awstools.dynamodb.objectbuilder.buildDynamoDBObject
-import com.johnturkson.awstools.dynamodb.requestbuilder.requests.UpdateItemRequest
+import com.johnturkson.awstools.dynamodb.client.DynamoDBClient
+import com.johnturkson.awstools.dynamodb.dsl.ExpressionAttributeValues
+import com.johnturkson.awstools.dynamodb.requests.UpdateItemRequest
 import com.johnturkson.awstools.ses.requestbuilder.builder.Content
 import com.johnturkson.awstools.ses.requestbuilder.builder.Destination
 import com.johnturkson.awstools.ses.requestbuilder.components.EmailContent
@@ -14,15 +15,14 @@ import com.johnturkson.tripwatch.common.responses.Response.ClientError.BadReques
 import com.johnturkson.tripwatch.common.responses.Response.ClientError.Forbidden.InvalidCredentialsError
 import com.johnturkson.tripwatch.common.responses.Response.ServerError.InternalServerError
 import com.johnturkson.tripwatch.common.responses.Response.Success.OK.*
-import com.johnturkson.tripwatch.server.configuration.DatabaseRequestHandler
 import com.johnturkson.tripwatch.server.configuration.EmailRequestHandler
 import com.johnturkson.tripwatch.server.configuration.SerializerConfiguration
+import com.johnturkson.tripwatch.server.database.data.UserVerificationCodeData
+import com.johnturkson.tripwatch.server.database.keys.UserKey
 import com.johnturkson.tripwatch.server.lambda.HttpLambdaFunction
 import com.johnturkson.tripwatch.server.lambda.HttpRequest
 import com.johnturkson.tripwatch.server.lambda.HttpResponse
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlin.random.Random
 import kotlin.random.nextInt
 
@@ -95,20 +95,15 @@ class SendVerificationEmailFunction : HttpLambdaFunction<Request, Response> {
         
         val setVerificationCodeRequest = UpdateItemRequest(
             "TripWatchUserVerificationCodes",
-            buildDynamoDBObject {
-                put("id", user)
-            },
+            UserKey(user),
             updateExpression = "set code = :code",
-            expressionAttributeValues = buildDynamoDBObject {
+            expressionAttributeValues = ExpressionAttributeValues {
                 put(":code", code)
             }
         )
         
         runCatching {
-            DatabaseRequestHandler.instance.updateItem(
-                setVerificationCodeRequest,
-                MapSerializer(String.serializer(), String.serializer())
-            )
+            DynamoDBClient().updateItem<UserKey, UserVerificationCodeData>(setVerificationCodeRequest)
         }.onFailure {
             return InternalServerError
         }
@@ -118,8 +113,6 @@ class SendVerificationEmailFunction : HttpLambdaFunction<Request, Response> {
         }.onFailure {
             return InternalServerError
         }
-        
-        // TODO put link into database
         
         return SendVerificationEmailResponse
     }
